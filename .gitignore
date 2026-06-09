@@ -1,0 +1,13 @@
+# Background music (large personal files)
+MUSICA/
+
+# Temp files
+*.cjs
+_build.cjs
+generate-*.cjs
+verify.cjs
+_check.cjs
+
+# System files
+Thumbs.db
+.DS_Store

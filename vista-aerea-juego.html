@@ -1,0 +1,274 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Ghost Cubes - Aerial View</title>
+<style>
+*{margin:0;padding:0;box-sizing:border-box}
+body{background:#000510;color:#0ff;font-family:"Courier New",monospace;overflow:hidden}
+#game-container{position:relative;width:100vw;height:100vh;background:#000510}
+canvas{width:100%;height:100%;display:block}
+@keyframes floatUp{0%{transform:translateY(110vh) scale(0);opacity:0}15%{opacity:1}85%{opacity:.6}100%{transform:translateY(-10vh) scale(1.5);opacity:0}}
+.particles{position:absolute;top:0;left:0;width:100%;height:100%;pointer-events:none;z-index:0;overflow:hidden}
+.particle{position:absolute;border-radius:50%;pointer-events:none;animation:floatUp linear infinite}
+#map-selector{position:absolute;top:12px;left:50%;transform:translateX(-50%);z-index:100;display:flex;gap:5px;background:rgba(0,10,20,.55);padding:6px 12px;border:1px solid rgba(0,255,255,.15);backdrop-filter:blur(15px);-webkit-backdrop-filter:blur(15px)}
+.map-btn{background:transparent;color:rgba(0,255,255,.4);border:1px solid rgba(0,255,255,.15);padding:7px 16px;font-family:"Courier New",monospace;font-size:.72em;cursor:pointer;letter-spacing:2px;transition:.2s;font-weight:bold}
+.map-btn:hover{color:#0ff;border-color:#0ff;box-shadow:0 0 15px #0ff44}
+.map-btn.active{color:#000510;background:#0ff;border-color:#0ff;box-shadow:0 0 20px #0ff;font-weight:900}
+#legend{position:absolute;bottom:15px;left:50%;transform:translateX(-50%);z-index:100;display:flex;gap:20px;background:rgba(0,10,20,.55);padding:8px 22px;border:1px solid rgba(0,255,255,.12);font-size:.68em;backdrop-filter:blur(15px);-webkit-backdrop-filter:blur(15px)}
+.leg-item{display:flex;align-items:center;gap:5px;color:rgba(0,255,255,.6);font-weight:bold;letter-spacing:1px}
+.leg-dot{font-size:1.4em;line-height:1}
+.portal-dot{color:#0ff;text-shadow:0 0 10px #0ff}
+.medkit-dot{color:#0f0;text-shadow:0 0 10px #0f0}
+.weapon-dot{color:#f0f;text-shadow:0 0 10px #f0f}
+.spawn-dot{color:#ff0;text-shadow:0 0 10px #ff0}
+</style>
+</head>
+<body>
+<div id="game-container"><div class="particles" id="particles-aerial"></div><div id="map-selector"><button class="map-btn active" data-map="0">CELESTIAL CRYPT</button><button class="map-btn" data-map="1">AMBER ABYSS</button><button class="map-btn" data-map="2">ALABASTER LABYRINTH</button><button class="map-btn" data-map="3">STEPPED BASTION</button><button class="map-btn" data-map="4">KALEIDOSCOPE PRISM</button></div><div id="legend"><span class="leg-item"><span class="leg-dot portal-dot">&#9679;</span> Portal</span><span class="leg-item"><span class="leg-dot medkit-dot">+</span> Medkit</span><span class="leg-item"><span class="leg-dot weapon-dot">&#9632;</span> Weapon</span><span class="leg-item"><span class="leg-dot spawn-dot">&#9650;</span> Spawn</span></div><canvas id="mazeCanvas"></canvas></div>
+<script type="module">
+import * as THREE from "https://unpkg.com/three@0.132.2/build/three.module.js";
+const UNIT_SIZE=5,MAP_SIZE=30,MAP_COUNT=5;
+let scene,camera,renderer,currentMapIndex=0;
+const mazeMaps = [
+    // MAPA 1 - Cripta Celeste (cyan)
+    [
+        [1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1],
+        [1,0,0,0,0,0,0,0,0,0,0,0,0,0,1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1],
+        [1,0,0,0,0,0,0,0,0,0,0,0,0,0,1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1],
+        [1,0,0,0,0,0,0,0,0,0,0,0,0,0,1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1],
+        [1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1],
+        [1,0,0,0,0,0,0,0,0,0,0,0,0,0,1,0,0,0,0,0,1,0,0,0,0,0,0,0,0,1],
+        [1,0,0,0,0,0,0,0,0,0,0,0,0,0,1,0,0,0,0,0,1,0,0,0,0,0,0,0,0,1],
+        [1,0,0,0,0,0,0,0,0,0,0,0,0,0,1,0,0,0,0,0,1,0,0,0,0,0,1,1,0,1],
+        [1,0,0,0,0,0,0,0,0,0,0,0,0,0,1,0,0,0,0,0,1,0,0,0,0,0,0,1,0,1],
+        [1,1,1,1,1,1,1,1,1,1,1,1,1,0,1,0,0,0,0,0,1,0,0,0,0,0,0,1,0,1],
+        [1,0,0,0,0,0,0,0,0,0,0,0,0,0,1,0,0,0,0,0,0,0,0,0,0,0,0,1,0,1],
+        [1,0,0,0,0,0,0,0,0,0,0,0,0,0,1,0,0,0,0,1,1,1,1,1,0,0,0,1,0,1],
+        [1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1,0,0,0,1,0,1],
+        [1,0,0,0,0,0,0,0,0,0,0,0,0,0,1,0,0,0,0,0,0,0,0,1,0,0,0,0,0,1],
+        [1,0,0,0,0,0,0,0,0,0,0,0,0,0,1,1,1,1,1,1,1,1,0,1,0,1,1,1,1,1],
+        [1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1],
+        [1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1],
+        [1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1],
+        [1,1,1,1,1,1,1,1,1,1,1,1,1,0,1,1,1,1,1,1,1,1,0,1,0,1,1,1,1,1],
+        [1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1],
+        [1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1],
+        [1,0,0,0,0,0,0,0,1,1,1,1,1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1],
+        [1,0,0,0,0,0,1,1,1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1],
+        [1,1,1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1],
+        [1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1],
+        [1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1],
+        [1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1],
+        [1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1],
+        [1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1],
+        [1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1]
+    ],
+    // MAPA 2 - Abismo Ámbar (yellow/orange)
+    [
+        [1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1],
+        [1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1],
+        [1,0,1,1,1,1,0,1,1,1,1,1,0,1,1,1,1,1,1,0,1,1,1,1,1,0,1,1,0,1],
+        [1,0,1,0,0,1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1,0,1,1,0,1],
+        [1,0,1,0,0,1,1,1,1,1,0,1,1,1,0,1,1,1,0,1,1,1,0,0,1,0,0,0,0,1],
+        [1,0,0,0,0,0,0,0,0,1,0,0,0,1,0,0,0,1,0,0,0,1,0,0,1,1,1,1,0,1],
+        [1,0,0,0,0,0,0,0,0,1,0,0,0,1,0,0,0,0,0,0,0,0,0,0,0,0,0,1,0,1],
+        [1,0,1,1,1,0,1,1,0,1,0,1,1,1,0,1,1,1,0,1,1,1,0,1,1,1,0,1,0,1],
+        [1,0,0,0,1,0,0,0,0,1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1,0,0,0,1],
+        [1,1,1,0,1,1,1,1,1,1,1,1,1,1,1,1,1,1,0,1,1,1,1,1,0,1,1,1,1,1],
+        [1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1],
+        [1,0,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,0,1],
+        [1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1],
+        [1,0,1,1,1,1,1,1,1,0,1,1,1,0,1,1,1,0,1,1,1,1,1,1,1,1,1,1,0,1],
+        [1,0,0,0,0,0,0,0,1,0,1,0,0,0,0,0,1,0,0,0,0,0,0,0,0,0,0,0,0,1],
+        [1,0,0,0,0,0,0,0,1,0,1,0,1,1,1,0,1,1,1,1,1,0,1,1,1,0,1,1,0,1],
+        [1,0,1,1,1,0,1,0,1,0,0,0,1,0,0,0,0,0,0,0,0,0,0,0,1,0,0,1,0,1],
+        [1,0,0,0,1,0,1,0,0,0,1,1,1,0,1,1,1,1,1,0,1,1,1,0,1,1,0,1,0,1],
+        [1,1,1,0,1,0,1,1,1,0,0,0,1,0,0,0,0,0,0,0,0,0,1,0,0,0,0,1,0,1],
+        [1,0,0,0,0,0,0,0,0,0,1,0,1,1,1,1,1,0,1,1,1,1,1,1,1,0,1,1,0,1],
+        [1,0,1,1,1,1,1,1,1,0,1,0,0,0,0,0,0,0,0,0,0,0,0,0,1,0,0,0,0,1],
+        [1,0,0,0,0,0,0,0,0,0,1,1,1,1,1,1,1,1,1,1,1,1,1,0,1,1,1,1,1,1],
+        [1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1],
+        [1,0,1,1,1,1,1,0,1,1,1,1,1,0,1,1,1,1,1,0,1,1,1,0,1,1,1,1,0,1],
+        [1,0,0,0,0,0,1,0,0,0,0,0,0,0,1,0,0,0,0,0,0,0,0,0,0,0,0,1,0,1],
+        [1,0,0,0,0,0,1,0,0,0,0,0,0,0,1,0,0,0,0,0,0,0,0,0,0,0,0,1,0,1],
+        [1,0,0,0,0,0,1,0,0,0,0,0,0,0,1,0,0,0,0,0,0,0,0,0,0,0,0,1,0,1],
+        [1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1],
+        [1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1],
+        [1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1]
+    ],
+    // MAPA 3 - Laberinto Alabastro (white/black, complex)
+    [
+        [1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1],
+        [1,0,0,0,1,0,0,0,0,0,1,0,0,0,0,0,1,0,0,0,0,0,1,0,0,0,0,0,0,1],
+        [1,0,1,0,1,0,1,1,1,0,1,0,1,1,1,0,1,0,1,1,1,0,1,0,1,1,1,1,0,1],
+        [1,0,1,0,0,0,0,0,1,0,0,0,0,0,1,0,0,0,0,0,1,0,0,0,0,0,0,1,0,1],
+        [1,0,1,1,1,1,1,0,1,1,1,1,1,0,1,1,1,1,1,0,1,1,1,1,1,1,0,1,0,1],
+        [1,0,0,0,0,0,1,0,0,0,0,0,0,0,0,0,0,0,1,0,0,0,0,0,0,0,0,0,0,1],
+        [1,0,1,1,1,0,1,1,1,1,1,0,1,1,1,1,1,0,1,1,1,1,1,0,1,1,1,1,0,1],
+        [1,0,0,0,1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1,0,1],
+        [1,1,1,0,1,1,1,1,1,1,1,0,1,1,1,1,1,1,1,1,1,1,1,1,1,1,0,1,0,1],
+        [1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1,0,1],
+        [1,0,1,1,1,1,1,0,1,1,1,1,1,1,1,1,1,0,1,1,1,1,1,0,1,1,1,1,0,1],
+        [1,0,0,0,0,0,1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1],
+        [1,1,1,1,1,0,1,1,1,1,1,0,1,1,1,1,1,0,1,1,1,1,1,0,1,1,1,1,1,1],
+        [1,0,0,0,0,0,0,0,0,0,1,0,0,0,0,0,0,0,0,0,0,0,1,0,0,0,0,0,0,1],
+        [1,0,1,1,1,1,1,1,1,0,1,1,1,1,1,1,1,1,1,1,1,0,1,1,1,1,1,1,0,1],
+        [1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1],
+        [1,1,1,1,1,1,1,1,1,0,1,1,1,1,1,1,1,1,1,1,1,0,1,1,1,1,1,1,0,1],
+        [1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1],
+        [1,0,1,1,1,0,1,1,1,1,1,0,1,1,1,1,1,1,1,1,1,0,1,1,1,1,1,0,1,1],
+        [1,0,0,0,1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1],
+        [1,0,1,0,1,1,1,1,1,0,1,1,1,1,1,0,1,1,1,1,1,0,1,1,1,0,1,1,0,1],
+        [1,0,1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1,0,1],
+        [1,0,1,1,1,1,1,0,1,1,1,1,1,0,1,1,1,1,1,0,1,1,1,1,1,1,0,1,0,1],
+        [1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1],
+        [1,0,1,1,1,1,1,0,1,1,1,1,1,0,1,1,1,1,1,0,1,1,1,1,1,1,0,1,1,1],
+        [1,0,0,0,1,0,0,0,0,0,1,0,0,0,0,0,0,0,1,0,0,0,0,0,0,0,0,0,0,1],
+        [1,1,1,0,1,0,1,1,1,0,1,0,1,1,1,1,1,0,1,0,1,1,1,1,1,1,1,1,0,1],
+        [1,0,0,0,0,0,0,0,1,0,0,0,0,0,1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1],
+        [1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1],
+        [1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1]
+    ],
+    // MAPA 4 - Bastión Escalonado (height/ramps theme)
+    [
+        [1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1],
+        [1,0,0,0,0,0,0,0,0,0,1,0,0,0,0,0,0,0,1,0,0,0,0,0,0,0,0,0,0,1],
+        [1,0,1,1,1,1,1,1,1,0,1,0,1,1,1,1,1,0,1,0,1,1,1,1,1,1,1,1,0,1],
+        [1,0,0,0,0,0,0,0,1,0,0,0,0,0,0,0,1,0,0,0,0,0,0,0,0,0,0,1,0,1],
+        [1,1,1,1,1,1,1,0,1,1,1,1,1,1,1,0,1,1,1,1,1,1,1,1,1,0,0,1,0,1],
+        [1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1,0,0,0,0,1],
+        [1,0,1,1,1,1,1,1,1,0,1,1,1,1,1,1,1,0,1,1,1,1,1,0,1,1,1,1,0,1],
+        [1,0,0,0,0,0,0,0,0,0,1,0,0,0,0,0,0,0,0,0,0,0,1,0,0,0,0,0,0,1],
+        [1,0,1,1,1,1,1,1,1,0,1,0,1,1,1,1,1,0,1,1,1,0,1,1,1,1,1,1,0,1],
+        [1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1],
+        [1,1,1,1,1,0,1,1,1,1,1,1,1,0,1,1,1,1,1,1,1,0,1,1,1,1,1,1,1,1],
+        [1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1],
+        [1,0,1,1,1,1,1,1,1,0,1,1,1,1,1,1,1,0,1,1,1,1,1,1,1,1,1,0,0,1],
+        [1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1,0,0,1],
+        [1,0,1,1,1,1,1,1,1,0,1,1,1,1,1,1,1,0,1,1,1,1,1,0,1,0,1,0,0,1],
+        [1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1,0,0,0,0,1],
+        [1,1,1,1,1,1,1,1,1,0,1,1,1,0,1,1,1,0,1,1,1,1,1,1,1,1,1,1,0,1],
+        [1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1],
+        [1,0,1,1,1,1,1,1,1,1,1,1,1,0,1,1,1,0,1,1,1,1,1,0,1,1,1,1,0,1],
+        [1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1],
+        [1,0,1,1,1,1,1,1,1,1,1,1,1,0,1,1,1,1,1,1,1,1,1,0,1,1,1,1,1,1],
+        [1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1],
+        [1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1],
+        [1,0,1,1,1,1,1,1,1,1,1,1,1,0,1,1,1,1,1,1,1,1,1,0,1,1,1,1,1,1],
+        [1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1],
+        [1,0,1,1,1,1,1,1,1,0,1,1,1,0,1,1,1,0,1,1,1,1,1,0,1,1,1,1,0,1],
+        [1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1],
+        [1,0,1,1,1,1,1,1,1,0,1,1,1,0,1,1,1,0,1,1,1,1,1,0,1,1,1,1,0,1],
+        [1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1],
+        [1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1]
+    ],
+    // MAPA 5 - Prisma Caleidoscopio (colorful)
+    [
+        [1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1],
+        [1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1],
+        [1,0,1,1,1,1,1,0,1,1,1,1,1,0,1,1,1,1,1,0,1,1,1,1,1,0,1,1,0,1],
+        [1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1],
+        [1,0,1,1,1,1,1,1,1,0,1,1,1,1,1,0,1,1,1,1,1,0,1,1,1,1,1,1,0,1],
+        [1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1],
+        [1,0,1,1,0,1,1,1,1,0,1,1,0,1,1,1,1,0,1,1,0,1,1,1,1,0,1,1,0,1],
+        [1,0,1,1,0,1,1,1,1,0,1,1,0,1,1,1,1,0,1,1,0,1,1,1,1,0,1,1,0,1],
+        [1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1],
+        [1,1,1,1,0,1,1,1,1,1,1,1,0,1,1,1,1,1,1,1,0,1,1,1,1,1,1,1,0,1],
+        [1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1],
+        [1,0,1,1,1,1,1,0,1,1,1,1,1,0,1,1,1,1,1,0,1,1,1,1,1,0,1,1,0,1],
+        [1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1],
+        [1,0,1,1,1,1,1,0,1,1,1,1,1,0,1,0,0,0,1,0,1,1,1,1,1,0,1,1,0,1],
+        [1,0,1,1,1,1,1,0,1,1,1,1,1,0,1,0,0,0,1,0,1,1,1,1,1,0,1,1,0,1],
+        [1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1],
+        [1,0,1,1,1,1,1,0,1,1,1,1,1,1,1,0,1,1,1,1,1,1,1,0,1,1,1,1,0,1],
+        [1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1],
+        [1,0,1,1,1,1,1,0,1,1,1,1,1,0,1,0,1,0,1,0,1,1,1,1,1,0,1,1,0,1],
+        [1,0,1,1,1,1,1,0,1,1,1,1,1,0,1,0,1,0,1,0,1,1,1,1,1,0,1,1,0,1],
+        [1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1],
+        [1,1,1,1,1,1,1,0,1,1,1,1,1,0,1,1,1,1,1,0,1,1,1,1,1,0,1,1,1,1],
+        [1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1],
+        [1,0,1,1,1,1,1,1,1,0,1,1,1,1,1,0,1,1,1,1,1,0,1,1,1,1,1,1,0,1],
+        [1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1],
+        [1,0,1,1,1,1,1,0,1,1,1,1,1,0,1,1,1,1,1,0,1,1,1,1,1,0,1,1,0,1],
+        [1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1],
+        [1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1],
+        [1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1],
+        [1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1]
+    ]
+    ];
+const mapHeightData = [null, null, null, null, null, null];
+    mapHeightData[4] = (() => {
+        const h = Array.from({length: 30}, () => new Array(30).fill(0));
+        const regions = [
+            [9, 19, 9, 19, 1], [12, 16, 12, 16, 2],
+            [4, 7, 4, 7, 1], [21, 25, 21, 25, 1],
+            [9, 19, 20, 20, 1], [9, 9, 9, 14, 1],
+            [14, 19, 8, 8, 1], [21, 25, 4, 7, 1],
+            [4, 7, 21, 25, 1], [27, 28, 27, 28, 2]
+        ];
+        for (const [r1, r2, c1, c2, hval] of regions) {
+            for (let r = r1; r <= r2; r++) {
+                for (let c = c1; c <= c2; c++) {
+                    if (mazeMaps[4][r][c] === 0) h[r][c] = hval;
+                }
+            }
+        }
+        return h;
+    })();
+const themeColors = [
+        { wallBg: "#000", wallLine: "#00ffff", wallEmissive: "#00ffff", fogColor: 0x000000, fogDensity: 0.04, lightColor: 0x00ffff, groundBg: "#000508", title: "CELESTIAL CRYPT", titleColor: "#0ff" },
+        { wallBg: "#050000", wallLine: "#ff8800", wallEmissive: "#ff6600", fogColor: 0x000000, fogDensity: 0.05, lightColor: 0xff6600, groundBg: "#080500", title: "AMBER ABYSS", titleColor: "#f80" },
+        { wallBg: "#FFF", wallLine: "#000", wallEmissive: "#888", fogColor: 0xaaaaaa, fogDensity: 0.02, lightColor: 0x888888, groundBg: "#e8e8e8", title: "ALABASTER LABYRINTH", titleColor: "#444" },
+        { wallBg: "#1a0a00", wallLine: "#cc8833", wallEmissive: "#cc6600", fogColor: 0x000000, fogDensity: 0.04, lightColor: 0xcc8833, groundBg: "#1a0a00", title: "STEPPED BASTION", titleColor: "#c83" },
+        { wallBg: "#000", wallLine: "#ff00ff", wallEmissive: "#ff00ff", fogColor: 0x000000, fogDensity: 0.04, lightColor: 0xff00ff, groundBg: "#050008", title: "KALEIDOSCOPE PRISM", titleColor: "#f0f" }
+    ];
+const portalCells = [
+        { x: 28, z: 4 },  { x: 2, z: 28 },
+        { x: 28, z: 28 }, { x: 1, z: 1 },
+        { x: 13, z: 14 }
+    ];
+const medkitPositions = [
+        [{x:6,z:6},{x:12,z:4},{x:4,z:12},{x:22,z:22},{x:18,z:26},{x:14,z:14},{x:8,z:20},{x:26,z:10},{x:5,z:26},{x:20,z:12},{x:28,z:18},{x:10,z:28},{x:16,z:8},{x:24,z:16}],
+        [{x:4,z:4},{x:24,z:6},{x:8,z:24},{x:26,z:26},{x:14,z:18},{x:18,z:10},{x:6,z:14},{x:22,z:22},{x:10,z:8},{x:28,z:14},{x:12,z:26},{x:2,z:20},{x:20,z:28},{x:16,z:4}],
+        [{x:4,z:26},{x:26,z:4},{x:8,z:8},{x:22,z:22},{x:14,z:16},{x:16,z:14},{x:6,z:20},{x:24,z:10},{x:2,z:14},{x:28,z:18},{x:12,z:26},{x:18,z:2},{x:10,z:24},{x:20,z:6}],
+        [{x:6,z:6},{x:24,z:24},{x:4,z:24},{x:26,z:4},{x:14,z:14},{x:14,z:18},{x:18,z:14},{x:18,z:18},{x:8,z:26},{x:22,z:8},{x:2,z:10},{x:28,z:22},{x:10,z:20},{x:20,z:10}],
+        [{x:10,z:10},{x:20,z:20},{x:6,z:24},{x:24,z:6},{x:14,z:4},{x:16,z:26},{x:4,z:14},{x:26,z:16},{x:8,z:18},{x:22,z:12},{x:12,z:22},{x:18,z:8},{x:28,z:28},{x:2,z:2}]
+    ];
+const weaponPositions = [
+        [{x:10,z:10,type:'rapid'},{x:20,z:6,type:'rapid'},{x:6,z:22,type:'shotgun'},{x:24,z:24,type:'bomb'},{x:14,z:28,type:'laser'},{x:28,z:14,type:'bomb'},{x:18,z:6,type:'rapid'},{x:8,z:18,type:'shotgun'},{x:5,z:5,type:'ray'},{x:26,z:26,type:'laser'}],
+        [{x:8,z:8,type:'bomb'},{x:22,z:4,type:'rapid'},{x:4,z:22,type:'shotgun'},{x:26,z:18,type:'laser'},{x:16,z:28,type:'bomb'},{x:28,z:8,type:'rapid'},{x:12,z:14,type:'ray'},{x:18,z:22,type:'shotgun'},{x:6,z:6,type:'rapid'},{x:24,z:24,type:'ray'}],
+        [{x:10,z:26,type:'laser'},{x:26,z:10,type:'ray'},{x:6,z:6,type:'shotgun'},{x:22,z:22,type:'bomb'},{x:14,z:14,type:'rapid'},{x:18,z:18,type:'rapid'},{x:8,z:18,type:'ray'},{x:24,z:8,type:'bomb'},{x:4,z:4,type:'laser'},{x:28,z:28,type:'shotgun'}],
+        [{x:8,z:8,type:'shotgun'},{x:22,z:22,type:'laser'},{x:6,z:24,type:'bomb'},{x:24,z:6,type:'ray'},{x:14,z:14,type:'rapid'},{x:18,z:18,type:'rapid'},{x:4,z:14,type:'shotgun'},{x:26,z:16,type:'laser'},{x:10,z:4,type:'bomb'},{x:20,z:26,type:'ray'}],
+        [{x:12,z:12,type:'ray'},{x:20,z:20,type:'shotgun'},{x:8,z:22,type:'laser'},{x:22,z:8,type:'bomb'},{x:14,z:26,type:'rapid'},{x:18,z:4,type:'shotgun'},{x:6,z:14,type:'ray'},{x:26,z:18,type:'bomb'},{x:4,z:26,type:'laser'},{x:28,z:4,type:'rapid'}]
+    ];
+const weaponColors = { rapid:0x00ff88, bomb:0xaa00ff, shotgun:0xff6600, laser:0xff0044, ray:0x44ff00 };;
+const weaponEmissive = { rapid:0x00ff88, bomb:0xcc00ff, shotgun:0xff4400, laser:0xff0044, ray:0x44ff00 };
+function getMap(){ return mazeMaps[currentMapIndex] }
+function getTheme(){ return themeColors[currentMapIndex] }
+function createGridTexture(bg,gr){ var c=document.createElement("canvas");c.width=128;c.height=128;var x=c.getContext("2d");x.fillStyle=bg;x.fillRect(0,0,128,128);x.strokeStyle=gr;x.lineWidth=2;x.strokeRect(0,0,128,128);return new THREE.CanvasTexture(c) }
+function buildMapView(){
+while(scene.children.length>0)scene.remove(scene.children[0]);
+var theme=getTheme();var map=getMap();
+var gt=createGridTexture(theme.groundBg,theme.wallLine);
+var g=new THREE.Mesh(new THREE.PlaneGeometry(MAP_SIZE*UNIT_SIZE*1.5,MAP_SIZE*UNIT_SIZE*1.5),new THREE.MeshBasicMaterial({map:gt,color:theme.lightColor,transparent:true,opacity:.35}));
+g.rotation.x=-Math.PI/2;g.position.set(MAP_SIZE*UNIT_SIZE/2,-.05,MAP_SIZE*UNIT_SIZE/2);scene.add(g);
+var wt=createGridTexture(theme.wallBg,theme.wallLine);
+var wm=new THREE.MeshBasicMaterial({map:wt,color:theme.lightColor,side:THREE.DoubleSide});
+var wg=new THREE.PlaneGeometry(UNIT_SIZE*.95,UNIT_SIZE*.95);
+for(var i=0;i<MAP_SIZE;i++)for(var j=0;j<MAP_SIZE;j++)if(map[i][j]===1){var w=new THREE.Mesh(wg,wm);w.rotation.x=-Math.PI/2;w.position.set(i*UNIT_SIZE,.01,j*UNIT_SIZE);scene.add(w)}
+if(currentMapIndex===4&&mapHeightData[4]){var hd=mapHeightData[4];for(var i=0;i<MAP_SIZE;i++)for(var j=0;j<MAP_SIZE;j++){var h=hd[i]?hd[i][j]:0;if(h>0&&map[i][j]===0){var p=new THREE.Mesh(new THREE.PlaneGeometry(UNIT_SIZE*.9,UNIT_SIZE*.9),new THREE.MeshBasicMaterial({color:theme.lightColor,transparent:true,opacity:.15+h*.1,side:THREE.DoubleSide}));p.rotation.x=-Math.PI/2;p.position.set(i*UNIT_SIZE,h+.02,j*UNIT_SIZE);scene.add(p)}}}
+var sp=new THREE.Mesh(new THREE.RingGeometry(.2,.6,3),new THREE.MeshBasicMaterial({color:0xffff00,side:THREE.DoubleSide}));sp.rotation.x=-Math.PI/2;sp.position.set(UNIT_SIZE,.15,UNIT_SIZE);scene.add(sp);
+var pc=portalCells[currentMapIndex];if(pc&&map[pc.x]&&map[pc.x][pc.z]===0){var ec=[0x00ffff,0xff6600,0xff0000,0xffaa00,0xff00ff][currentMapIndex];var pr=new THREE.Mesh(new THREE.RingGeometry(.3,1,24),new THREE.MeshBasicMaterial({color:ec,side:THREE.DoubleSide,transparent:true,opacity:.9}));pr.rotation.x=-Math.PI/2;pr.position.set(pc.x*UNIT_SIZE,.2,pc.z*UNIT_SIZE);scene.add(pr);var pg=new THREE.Mesh(new THREE.RingGeometry(.5,1.6,24),new THREE.MeshBasicMaterial({color:ec,side:THREE.DoubleSide,transparent:true,opacity:.2}));pg.rotation.x=-Math.PI/2;pg.position.set(pc.x*UNIT_SIZE,.15,pc.z*UNIT_SIZE);scene.add(pg)}
+var mks=medkitPositions[currentMapIndex]||medkitPositions[0];mks.forEach(function(p){if(map[p.x]&&map[p.x][p.z]===0){var m=new THREE.Mesh(new THREE.RingGeometry(.15,.4,3),new THREE.MeshBasicMaterial({color:0x00ff00,side:THREE.DoubleSide}));m.rotation.x=-Math.PI/2;m.position.set(p.x*UNIT_SIZE,.12,p.z*UNIT_SIZE);scene.add(m)}});
+var wps=weaponPositions[currentMapIndex]||[];wps.forEach(function(p){if(map[p.x]&&map[p.x][p.z]===0){var wc=weaponColors[p.type]||0xffffff;var w=new THREE.Mesh(new THREE.RingGeometry(.12,.35,3),new THREE.MeshBasicMaterial({color:wc,side:THREE.DoubleSide,transparent:true,opacity:.85}));w.rotation.x=-Math.PI/2;w.position.set(p.x*UNIT_SIZE,.12,p.z*UNIT_SIZE);scene.add(w)}})
+}
+function init(){scene=new THREE.Scene();scene.background=new THREE.Color(0x000510);var w=MAP_SIZE*UNIT_SIZE;var a=window.innerWidth/window.innerHeight;var v=w*.52;camera=new THREE.OrthographicCamera(-v*a,v*a,v,-v,.1,500);camera.position.set(w/2,100,w/2);camera.lookAt(w/2,0,w/2);renderer=new THREE.WebGLRenderer({canvas:document.getElementById("mazeCanvas"),antialias:true});renderer.setPixelRatio(Math.min(window.devicePixelRatio,2));renderer.setSize(window.innerWidth,window.innerHeight);buildMapView();animate()}
+function animate(){ requestAnimationFrame(animate);renderer.render(scene,camera) }
+function switchMap(i){ currentMapIndex=i;document.querySelectorAll(".map-btn").forEach(function(b){b.classList.remove("active")});document.querySelector(".map-btn[data-map=\x22"+i+"\x22]").classList.add("active");buildMapView() }
+window.addEventListener("resize",function(){var a=window.innerWidth/window.innerHeight;var v=MAP_SIZE*UNIT_SIZE*.52;camera.left=-v*a;camera.right=v*a;camera.top=v;camera.bottom=-v;camera.updateProjectionMatrix();renderer.setSize(window.innerWidth,window.innerHeight)});
+window.onload=function(){ var c=document.getElementById('particles-aerial');for(var i=0;i<25;i++){var p=document.createElement('div');p.className='particle';var col=['#0ff','#f0f','rgba(0,255,255,.5)','rgba(255,0,255,.5)'][Math.floor(Math.random()*4)];var s=1+Math.random()*3;p.style.cssText='left:'+(Math.random()*100)+'%;width:'+s+'px;height:'+s+'px;background:'+col+';box-shadow:0 0 '+s*2+'px '+col+';animation-duration:'+(10+Math.random()*14)+'s;animation-delay:'+(Math.random()*12)+'s;opacity:'+(.2+Math.random()*.4);c.appendChild(p)}; document.querySelectorAll(".map-btn").forEach(function(b){ b.addEventListener("click",function(){ switchMap(parseInt(this.dataset.map)) })});init() };
+</script>
+</body>
+</html>
