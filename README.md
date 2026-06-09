@@ -1,6 +1,6 @@
 # Ghost Cubes — Retro Neon FPS v2.0
 
-> **Play online:** [https://eduardofierroduque-sudo.github.io/Ghost-Cat---Neon-Protocol/](https://eduardofierroduque-sudo.github.io/Ghost-Cat---Neon-Protocol/)
+> **Play online:** [https://eduardofierroduque-sudo.github.io/_ghost_cubes/](https://eduardofierroduque-sudo.github.io/_ghost_cubes/)
 
 A cyberpunk-horror first-person shooter built with Three.js. Hunt ghost cubes across five procedurally-designed labyrinth maps in a neon-drenched retro aesthetic — the full evolution from the original Ghost Cat prototype.
 
