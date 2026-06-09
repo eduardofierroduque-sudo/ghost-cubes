@@ -1,3 +1,6 @@
+# Background music (large personal files)
+MUSICA/
+
 # Temp files
 *.cjs
 _build.cjs
