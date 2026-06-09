@@ -1,6 +1,6 @@
 # Ghost Cubes — Retro Neon FPS v2.0
 
-> **Play online:** [https://eduardofierroduque-sudo.github.io/_ghost_cubes/](https://eduardofierroduque-sudo.github.io/_ghost_cubes/)
+> **Play online:** [https://eduardofierroduque-sudo.github.io/ghost-cubes/](https://eduardofierroduque-sudo.github.io/ghost-cubes/)
 
 A cyberpunk-horror first-person shooter built with Three.js. Hunt ghost cubes across five procedurally-designed labyrinth maps in a neon-drenched retro aesthetic — the full evolution from the original Ghost Cat prototype.
 
@@ -172,20 +172,29 @@ Every map spawns 50 ghosts from 3 variant pools:
 
 ---
 
-## Leaderboard Setup (Supabase)
+## Leaderboard
 
+The game is connected to a **Supabase** PostgreSQL database for global cross-player scores. The leaderboard is fully operational — all players see the same top 10 rankings.
+
+### How it works
+- On death, the player's score is saved to Supabase + `localStorage` (offline fallback)
+- The leaderboard fetches and merges both sources, sorted by kills descending
+- If Supabase is unreachable, the game continues working with local scores only
+
+### The anon key is public
+The `SUPABASE_KEY` visible in `index.html` is an **anon/public key** — it is designed by Supabase to be embedded in client-side code. It has `SELECT` and `INSERT` permissions only (no DELETE/UPDATE). The admin key is never exposed.
+
+### Self-hosting
+To use your own Supabase project:
 1. Create a free project at [supabase.com](https://supabase.com)
-2. Go to **SQL Editor** and run:
+2. Run the SQL below in the SQL Editor:
 ```sql
 CREATE TABLE scores (id SERIAL PRIMARY KEY, name TEXT, score INT, time FLOAT, maps INT, date BIGINT);
 CREATE POLICY "public_read" ON scores FOR SELECT USING (true);
 CREATE POLICY "public_insert" ON scores FOR INSERT WITH CHECK (true);
 ALTER TABLE scores ENABLE ROW LEVEL SECURITY;
 ```
-3. Copy **Project URL** and **anon key** from Settings > API
-4. Paste in `index.html` at `SUPABASE_URL` and `SUPABASE_KEY`
-
-Without Supabase, scores save to `localStorage` (offline mode).
+3. Replace `SUPABASE_URL` and `SUPABASE_KEY` in `index.html` with your project values
 
 ---
 
@@ -195,6 +204,7 @@ Without Supabase, scores save to `localStorage` (offline mode).
 ├── index.html                     # Main game
 ├── vista-aerea-juego.html         # Aerial map viewer
 ├── catalogo-fantasmas.html        # Ghost catalog (3D viewer)
+├── MUSICA/                        # Original soundtrack (2 tracks)
 ├── escenario *.png                # Map screenshots
 ├── v1/                            # Ghost Cat v1.0 (archive)
 │   ├── index.html                 # Original prototype
