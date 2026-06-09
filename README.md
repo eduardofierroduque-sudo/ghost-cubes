@@ -4,6 +4,13 @@
 
 A cyberpunk-horror first-person shooter built with Three.js. Hunt ghost cubes across five procedurally-designed labyrinth maps in a neon-drenched retro aesthetic — the full evolution from the original Ghost Cat prototype.
 
+### Companion Pages
+
+| Page | Link | Description |
+|------|------|-------------|
+| **Aerial Map Viewer** | [Open →](https://eduardofierroduque-sudo.github.io/ghost-cubes/vista-aerea-juego.html) | Top-down view of all 5 maps with element indicators |
+| **Ghost Catalog** | [Open →](https://eduardofierroduque-sudo.github.io/ghost-cubes/catalogo-fantasmas.html) | Interactive 3D renders of all 15 ghost variants |
+
 ---
 
 ## Table of Contents
@@ -72,7 +79,7 @@ Translucent glass panels with `backdrop-filter: blur(20px)`, floating cyan/magen
 Scores saved to Supabase PostgreSQL with automatic localStorage fallback. Players from anywhere see the same top 10.
 
 ### Companion Tools
-- [**Aerial Map Viewer**](vista-aerea-juego.html) — Top-down orthographic view of all 5 maps with color-coded indicators (portals, medkits, weapons, spawn).
+- [**Aerial Map Viewer**](https://eduardofierroduque-sudo.github.io/ghost-cubes/vista-aerea-juego.html) — Top-down orthographic view of all 5 maps with color-coded indicators (portals, medkits, weapons, spawn).
 - [**Ghost Catalog**](catalogo-fantasmas.html) — Interactive 3D renders of all 15 ghost variants with full stats.
 
 ---
@@ -89,7 +96,7 @@ Scores saved to Supabase PostgreSQL with automatic localStorage fallback. Player
 - **Procedural Sound** — Web Audio API synthesizer for every weapon and explosion
 - **Glassmorphism UI** — Translucent panels with backdrop blur, floating particles, hacker-style glitch effects
 - **Aerial Map Viewer** — Separate HTML page to inspect all 5 maps top-down with element indicators
-- **Ghost Catalog** — Interactive 3D viewer showing all 15 enemy variants with stats
+- **Ghost Catalog** — [Interactive 3D viewer](https://eduardofierroduque-sudo.github.io/ghost-cubes/catalogo-fantasmas.html) showing all 15 enemy variants with stats
 
 ---
 
@@ -126,7 +133,7 @@ Every map spawns 50 ghosts from 3 variant pools:
 - **Attack**: Contact (<1.5 units), 15 damage, 300ms invulnerability window
 - **Chase**: Within 25 units of player
 - **Limit**: 50 ghosts per map max
-- [View complete catalog →](catalogo-fantasmas.html)
+- [View complete catalog →](https://eduardofierroduque-sudo.github.io/ghost-cubes/catalogo-fantasmas.html)
 
 ---
 
