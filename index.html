@@ -157,6 +157,8 @@
             -webkit-backdrop-filter: blur(5px);
         }
         #start-btn:hover { background: #0ff; color: #000510; box-shadow: 0 0 50px #0ff, 0 0 100px #0ff66; }
+        #start-btn:disabled { opacity: 0.25; cursor: not-allowed; box-shadow: none; color: rgba(0,255,255,0.2); border-color: rgba(0,255,255,0.1); }
+        #start-btn:disabled:hover { background: transparent; color: rgba(0,255,255,0.2); box-shadow: none; }
         #mode-label {
             margin-top: 18px; font-size: 0.7em; letter-spacing: 4px;
             color: rgba(0,255,255,0.4); font-weight: 900; text-transform: uppercase;
@@ -179,6 +181,8 @@
         #start-page.pink .start-line { background: linear-gradient(90deg, transparent, #f6a, transparent); }
         #start-page.pink #start-btn { color: #f6a; border-color: #f6a; box-shadow: 0 0 25px rgba(255,50,150,0.3); }
         #start-page.pink #start-btn:hover { background: #f6a; color: #000510; box-shadow: 0 0 50px #f6a, 0 0 100px rgba(255,50,150,0.5); }
+        #start-page.pink #start-btn:disabled { opacity: 0.25; cursor: not-allowed; box-shadow: none; color: rgba(255,100,170,0.2); border-color: rgba(255,100,170,0.1); }
+        #start-page.pink #start-btn:disabled:hover { background: transparent; color: rgba(255,100,170,0.2); box-shadow: none; }
         #start-page.pink #mode-label { color: rgba(255,100,170,0.5); }
         #start-page.pink .mode-btn { color: rgba(255,100,170,0.4); border-color: rgba(255,100,170,0.2); }
         #start-page.pink .mode-btn:hover { color: #f6a; border-color: #f6a; box-shadow: 0 0 15px rgba(255,100,170,0.4); }
@@ -291,7 +295,7 @@
                 <button class="mode-btn active" data-mode="massacre">MASSACRE</button>
                 <button class="mode-btn" data-mode="littlehen">LITTLE HEN</button>
             </div>
-            <button id="start-btn">> PLAY</button>
+            <button id="start-btn" disabled>> PLAY</button>
             <div id="start-controls">W A S D — MOVE &nbsp;|&nbsp; SPACE — JUMP &nbsp;|&nbsp; CLICK — SHOOT</div>
         </div>
         <div class="page-footer">Created by www.fierroduque.com</div>
@@ -1895,9 +1899,17 @@
             });
         });
 
+        // Require name before enabling PLAY
+        const nameInput = document.getElementById('player-name');
+        const playBtn = document.getElementById('start-btn');
+        nameInput.addEventListener('input', () => {
+            playBtn.disabled = nameInput.value.trim().length === 0;
+        });
+
         document.getElementById('start-btn').addEventListener('click', () => {
             const inp = document.getElementById('player-name');
-            playerName = inp.value.trim() || 'ANON';
+            playerName = inp.value.trim();
+            if (!playerName) return;
             gameStartTime = Date.now();
             timerValue = 0; portalCount = 0;
             document.getElementById('start-page').style.display = 'none';
