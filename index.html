@@ -230,8 +230,12 @@
         }
         #score-details { font-size: 1.2em; margin-bottom: 25px; line-height: 2.2; text-align: center; font-weight: bold; letter-spacing: 2px; }
         #score-details span { color: #f0f; text-shadow: 0 0 15px #f0f; }
-        #leaderboard { margin: 10px auto 20px; max-width: 440px; text-align: left; font-size: 0.85em; width: 100%; }
+        #leaderboard { margin: 10px auto 20px; max-width: 440px; max-height: 260px; overflow-y: auto; text-align: left; font-size: 0.85em; width: 100%; border: 1px solid rgba(0,255,255,0.08); background: rgba(0,0,0,0.2); padding: 6px 0; }
         #leaderboard h3 { text-align: center; color: #0ff; text-shadow: 0 0 15px #0ff; margin-bottom: 12px; letter-spacing: 6px; font-weight: 900; }
+        #leaderboard::-webkit-scrollbar { width: 4px; }
+        #leaderboard::-webkit-scrollbar-track { background: rgba(0,0,0,0.2); }
+        #leaderboard::-webkit-scrollbar-thumb { background: rgba(0,255,255,0.3); border-radius: 2px; }
+        #leaderboard::-webkit-scrollbar-thumb:hover { background: rgba(0,255,255,0.5); }
         .lb-entry { display: flex; justify-content: space-between; padding: 5px 14px; border-bottom: 1px solid rgba(0,255,255,0.08); }
         .lb-rank { color: #ff0; width: 40px; font-weight: 900; text-shadow: 0 0 8px #ff0; }
         .lb-name { flex: 1; font-weight: bold; }
