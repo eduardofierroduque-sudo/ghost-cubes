@@ -86,16 +86,20 @@ Scores saved to Supabase PostgreSQL with automatic localStorage fallback. Player
 
 ## Features
 
+- **Two Game Modes** — Massacre (80 ghosts, hardcore) and Little Hen (25 ghosts, easy) with visual theme switch and different soundtracks
 - **5 Unique Maps** — Celestial Crypt, Amber Abyss, Alabaster Labyrinth, Stepped Bastion, Kaleidoscope Prism
-- **6 Weapons** — Default, Rapid Burst, Bomb (AoE), Shotgun (5 pellets), Laser (continuous beam), Ray (piercing)
+- **6 Weapons** — Default, Rapid Burst, Bomb (AoE), Shotgun (5 pellets), Laser (continuous beam), Ray (piercing) with "GUN" floating labels
 - **15 Ghost Variants** — Scouts (fast, 1 HP), Soldiers (balanced, 2 HP), Tanks (slow, 3-4 HP), each with unique face textures and colors per map
-- **Random Portal Teleportation** — Enter a portal to warp to a random different map
-- **Height System (Map 4)** — Multi-level platforms with smooth player Y adjustment
+- **5 Portals Per Map** — Gold donut portals with "TUNNEL" labels, random teleportation between maps
+- **Sprint Mechanic** — Hold `SHIFT` to run 1.8× faster
+- **Random Spawn** — Player starts at a random open cell on each map
 - **Medkit Pickups** — 14 per map, heal 30 HP each
-- **Global Leaderboard** — Supabase integration for cross-player scores
+- **Global Leaderboard** — Supabase PostgreSQL integration for cross-player scores
 - **Procedural Sound** — Web Audio API synthesizer for every weapon and explosion
+- **Dual Soundtrack** — Different original music per game mode
 - **Glassmorphism UI** — Translucent panels with backdrop blur, floating particles, hacker-style glitch effects
-- **Aerial Map Viewer** — Separate HTML page to inspect all 5 maps top-down with element indicators
+- **Mode-Based Color Themes** — Cyan/blue for Massacre, pink/rose for Little Hen
+- **Aerial Map Viewer** — Separate HTML page to inspect all 5 maps top-down
 - **Ghost Catalog** — [Interactive 3D viewer](https://eduardofierroduque-sudo.github.io/ghost-cubes/catalogo-fantasmas.html) showing all 15 enemy variants with stats
 
 ---
@@ -108,7 +112,7 @@ Scores saved to Supabase PostgreSQL with automatic localStorage fallback. Player
 | 2 | **Amber Abyss** | Orange/amber on dark, tight passages | 30×30 |
 | 3 | **Alabaster Labyrinth** | White/gray, complex maze | 30×30 |
 | 4 | **Stepped Bastion** | Earthy tones, multi-height platforms | 30×30 |
-| 5 | **Kaleidoscope Prism** | Magenta/black, colorful enemies | 30×30 |
+| 5 | **Kaleidoscope Prism** | Magenta/black, flat layout, colorful enemies | 30×30 |
 
 | Celestial Crypt | Amber Abyss | Alabaster Labyrinth |
 |:---:|:---:|:---:|
@@ -122,7 +126,14 @@ Scores saved to Supabase PostgreSQL with automatic localStorage fallback. Player
 
 ## Ghosts
 
-Every map spawns 50 ghosts from 3 variant pools:
+Ghost count depends on the selected game mode:
+
+| Mode | Ghosts per Map |
+|------|---------------|
+| **Massacre** | 80 |
+| **Little Hen** | 25 |
+
+Each map spawns ghosts from 3 variant pools:
 
 | Type | Face | HP | Speed | Role |
 |------|------|-----|-------|------|
@@ -132,7 +143,6 @@ Every map spawns 50 ghosts from 3 variant pools:
 
 - **Attack**: Contact (<1.5 units), 15 damage, 300ms invulnerability window
 - **Chase**: Within 25 units of player
-- **Limit**: 50 ghosts per map max
 - [View complete catalog →](https://eduardofierroduque-sudo.github.io/ghost-cubes/catalogo-fantasmas.html)
 
 ---
@@ -150,20 +160,31 @@ Every map spawns 50 ghosts from 3 variant pools:
 
 ---
 
-## How to Play
+## Game Modes
+
+| | Massacre | Little Hen |
+|---|---|---|
+| **Ghosts** | 80 per map | 25 per map |
+| **Difficulty** | Hardcore | Easy |
+| **UI Color** | Cyan/blue neon | Pink/rose neon |
+| **Soundtrack** | Concrete Syntax (×2) | Little Hen Runs / Fleeing |
+| **Spawn** | Random cell | Random cell |
+
+Select the mode on the start screen below the name input. The entire UI theme switches instantly.
 
 | Control | Action |
 |---------|--------|
 | `W A S D` | Move |
+| `SHIFT` | Sprint (1.8× speed) |
 | `Mouse` | Look around |
 | `Left Click` | Shoot |
 | `Space` | Jump |
 | `ESC` | Pause / Resume |
 
 - **Goal**: Kill as many ghosts as possible. Each ghost kill = +1 score.
-- **Portals**: Glowing rings — walk through to teleport to a random map.
-- **Pickups**: Green crosses = medkits (+30 HP). Colored rings = weapon upgrades.
-- **Death**: 100 HP. Score saved to leaderboard on death.
+- **Portals**: Gold donut rings labeled "TUNNEL" — walk through to teleport to a random map (5 per level).
+- **Pickups**: Green crosses = medkits (+30 HP). Colored rings with "GUN" labels = weapon upgrades.
+- **Spawn**: Random open cell on each map entry.
 
 ---
 
@@ -211,7 +232,8 @@ ALTER TABLE scores ENABLE ROW LEVEL SECURITY;
 ├── index.html                     # Main game
 ├── vista-aerea-juego.html         # Aerial map viewer
 ├── catalogo-fantasmas.html        # Ghost catalog (3D viewer)
-├── MUSICA/                        # Original soundtrack (2 tracks)
+├── MUSICA/                        # Massacre soundtrack (2 tracks)
+│   └── MUSICA LITTLE HEN/         # Little Hen soundtrack (2 tracks)
 ├── escenario *.png                # Map screenshots
 ├── v1/                            # Ghost Cat v1.0 (archive)
 │   ├── index.html                 # Original prototype
@@ -243,10 +265,13 @@ ALTER TABLE scores ENABLE ROW LEVEL SECURITY;
 | Map size | 10×10 | 30×30 | 9× area |
 | Ghost variants | 1 | 15 | 15× |
 | Weapons | 1 | 6 | 6× |
-| Lines of code | ~500 | ~1,650 | 3.3× |
-| UI style | Basic overlay | Glassmorphism | Complete redesign |
-| Sound | External file | Procedural synth | Zero dependencies |
-| Portals | None | 5-way random | New mechanic |
+| Game modes | 1 | 2 (Massacre / Little Hen) | 2× |
+| Ghosts per map | Fixed | 80 / 25 per mode | Dynamic |
+| Portals per map | None | 5 with "TUNNEL" labels | New |
+| Movement | Walk | Walk + Sprint (SHIFT) | New |
+| Lines of code | ~500 | ~1,750 | 3.5× |
+| UI style | Basic overlay | Glassmorphism + dual themes | Complete redesign |
+| Sound | External file | Procedural synth + dual soundtrack | Zero dependencies |
 | Leaderboard | None | Supabase + local | New feature |
 | Tools | None | Viewer + Catalog | New companion pages |
 

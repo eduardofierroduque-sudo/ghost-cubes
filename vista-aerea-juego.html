@@ -225,10 +225,12 @@ const themeColors = [
         { wallBg: "#000", wallLine: "#ff00ff", wallEmissive: "#ff00ff", fogColor: 0x000000, fogDensity: 0.04, lightColor: 0xff00ff, groundBg: "#050008", title: "KALEIDOSCOPE PRISM", titleColor: "#f0f" }
     ];
 const portalCells = [
-        { x: 28, z: 4 },  { x: 2, z: 28 },
-        { x: 28, z: 28 }, { x: 1, z: 1 },
-        { x: 13, z: 14 }
-    ];
+    [ {x:28,z:4},{x:4,z:28},{x:15,z:16},{x:3,z:6},{x:25,z:25} ],
+    [ {x:2,z:28},{x:26,z:2},{x:20,z:10},{x:9,z:10},{x:24,z:24} ],
+    [ {x:26,z:28},{x:2,z:5},{x:16,z:14},{x:8,z:22},{x:20,z:6} ],
+    [ {x:2,z:2},{x:27,z:27},{x:12,z:16},{x:3,z:28},{x:26,z:5} ],
+    [ {x:13,z:14},{x:3,z:3},{x:27,z:27},{x:2,z:26},{x:25,z:3} ]
+];
 const medkitPositions = [
         [{x:6,z:6},{x:12,z:4},{x:4,z:12},{x:22,z:22},{x:18,z:26},{x:14,z:14},{x:8,z:20},{x:26,z:10},{x:5,z:26},{x:20,z:12},{x:28,z:18},{x:10,z:28},{x:16,z:8},{x:24,z:16}],
         [{x:4,z:4},{x:24,z:6},{x:8,z:24},{x:26,z:26},{x:14,z:18},{x:18,z:10},{x:6,z:14},{x:22,z:22},{x:10,z:8},{x:28,z:14},{x:12,z:26},{x:2,z:20},{x:20,z:28},{x:16,z:4}],
@@ -258,9 +260,9 @@ var wt=createGridTexture(theme.wallBg,theme.wallLine);
 var wm=new THREE.MeshBasicMaterial({map:wt,color:theme.lightColor,side:THREE.DoubleSide});
 var wg=new THREE.PlaneGeometry(UNIT_SIZE*.95,UNIT_SIZE*.95);
 for(var i=0;i<MAP_SIZE;i++)for(var j=0;j<MAP_SIZE;j++)if(map[i][j]===1){var w=new THREE.Mesh(wg,wm);w.rotation.x=-Math.PI/2;w.position.set(i*UNIT_SIZE,.01,j*UNIT_SIZE);scene.add(w)}
-if(currentMapIndex===4&&mapHeightData[4]){var hd=mapHeightData[4];for(var i=0;i<MAP_SIZE;i++)for(var j=0;j<MAP_SIZE;j++){var h=hd[i]?hd[i][j]:0;if(h>0&&map[i][j]===0){var p=new THREE.Mesh(new THREE.PlaneGeometry(UNIT_SIZE*.9,UNIT_SIZE*.9),new THREE.MeshBasicMaterial({color:theme.lightColor,transparent:true,opacity:.15+h*.1,side:THREE.DoubleSide}));p.rotation.x=-Math.PI/2;p.position.set(i*UNIT_SIZE,h+.02,j*UNIT_SIZE);scene.add(p)}}}
+// height platforms removed
 var sp=new THREE.Mesh(new THREE.RingGeometry(.2,.6,3),new THREE.MeshBasicMaterial({color:0xffff00,side:THREE.DoubleSide}));sp.rotation.x=-Math.PI/2;sp.position.set(UNIT_SIZE,.15,UNIT_SIZE);scene.add(sp);
-var pc=portalCells[currentMapIndex];if(pc&&map[pc.x]&&map[pc.x][pc.z]===0){var ec=[0x00ffff,0xff6600,0xff0000,0xffaa00,0xff00ff][currentMapIndex];var pr=new THREE.Mesh(new THREE.RingGeometry(.3,1,24),new THREE.MeshBasicMaterial({color:ec,side:THREE.DoubleSide,transparent:true,opacity:.9}));pr.rotation.x=-Math.PI/2;pr.position.set(pc.x*UNIT_SIZE,.2,pc.z*UNIT_SIZE);scene.add(pr);var pg=new THREE.Mesh(new THREE.RingGeometry(.5,1.6,24),new THREE.MeshBasicMaterial({color:ec,side:THREE.DoubleSide,transparent:true,opacity:.2}));pg.rotation.x=-Math.PI/2;pg.position.set(pc.x*UNIT_SIZE,.15,pc.z*UNIT_SIZE);scene.add(pg)}
+var pcs=portalCells[currentMapIndex];pcs.forEach(function(pc){if(map[pc.x]&&map[pc.x][pc.z]===0){var ec=[0x00ffff,0xff6600,0xff0000,0xffaa00,0xff00ff][currentMapIndex];var pr=new THREE.Mesh(new THREE.RingGeometry(.3,1,24),new THREE.MeshBasicMaterial({color:ec,side:THREE.DoubleSide,transparent:true,opacity:.9}));pr.rotation.x=-Math.PI/2;pr.position.set(pc.x*UNIT_SIZE,.2,pc.z*UNIT_SIZE);scene.add(pr);var pg=new THREE.Mesh(new THREE.RingGeometry(.5,1.6,24),new THREE.MeshBasicMaterial({color:ec,side:THREE.DoubleSide,transparent:true,opacity:.2}));pg.rotation.x=-Math.PI/2;pg.position.set(pc.x*UNIT_SIZE,.15,pc.z*UNIT_SIZE);scene.add(pg)}});
 var mks=medkitPositions[currentMapIndex]||medkitPositions[0];mks.forEach(function(p){if(map[p.x]&&map[p.x][p.z]===0){var m=new THREE.Mesh(new THREE.RingGeometry(.15,.4,3),new THREE.MeshBasicMaterial({color:0x00ff00,side:THREE.DoubleSide}));m.rotation.x=-Math.PI/2;m.position.set(p.x*UNIT_SIZE,.12,p.z*UNIT_SIZE);scene.add(m)}});
 var wps=weaponPositions[currentMapIndex]||[];wps.forEach(function(p){if(map[p.x]&&map[p.x][p.z]===0){var wc=weaponColors[p.type]||0xffffff;var w=new THREE.Mesh(new THREE.RingGeometry(.12,.35,3),new THREE.MeshBasicMaterial({color:wc,side:THREE.DoubleSide,transparent:true,opacity:.85}));w.rotation.x=-Math.PI/2;w.position.set(p.x*UNIT_SIZE,.12,p.z*UNIT_SIZE);scene.add(w)}})
 }

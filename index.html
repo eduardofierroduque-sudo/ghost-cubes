@@ -157,6 +157,36 @@
             -webkit-backdrop-filter: blur(5px);
         }
         #start-btn:hover { background: #0ff; color: #000510; box-shadow: 0 0 50px #0ff, 0 0 100px #0ff66; }
+        #mode-label {
+            margin-top: 18px; font-size: 0.7em; letter-spacing: 4px;
+            color: rgba(0,255,255,0.4); font-weight: 900; text-transform: uppercase;
+        }
+        #mode-selector { display: flex; gap: 10px; margin-top: 10px; justify-content: center; }
+        .mode-btn {
+            background: transparent; color: rgba(0,255,255,0.35); border: 1px solid rgba(0,255,255,0.2);
+            padding: 10px 30px; font-family: 'Courier New', monospace; font-size: 0.9em; font-weight: 900;
+            cursor: pointer; letter-spacing: 4px; transition: 0.25s;
+        }
+        .mode-btn:hover { color: #0ff; border-color: #0ff; box-shadow: 0 0 15px #0ff44; }
+        .mode-btn.active { color: #000510; background: #0ff; border-color: #0ff; box-shadow: 0 0 20px #0ff66; }
+
+        /* Pink mode (Little Hen) */
+        #start-page.pink .start-frame { border-color: rgba(255,50,150,0.5); border-top-color: rgba(255,50,150,0.6); box-shadow: 0 8px 40px rgba(0,0,0,0.5), 0 0 60px rgba(255,50,150,0.1), inset 0 1px 0 rgba(255,50,150,0.08); }
+        #start-page.pink .start-frame::before { background: linear-gradient(90deg, transparent, #f6a, rgba(255,50,150,0.3), transparent); box-shadow: 0 0 15px #f6a; }
+        #start-page.pink .start-frame::after { background: linear-gradient(90deg, transparent, rgba(255,50,150,0.3), #f6a, transparent); box-shadow: 0 0 15px #f6a; }
+        #start-page.pink #start-logo { text-shadow: 0 0 40px #f6a, 0 0 80px rgba(255,80,150,0.3), 3px 3px 0 rgba(0,0,0,0.8), 5px 0 rgba(0,255,255,0.3); color: #f8c; }
+        #start-page.pink #start-sub { color: #f6a; text-shadow: 0 0 15px #f6a, 0 0 30px rgba(255,80,150,0.3); }
+        #start-page.pink .start-line { background: linear-gradient(90deg, transparent, #f6a, transparent); }
+        #start-page.pink #start-btn { color: #f6a; border-color: #f6a; box-shadow: 0 0 25px rgba(255,50,150,0.3); }
+        #start-page.pink #start-btn:hover { background: #f6a; color: #000510; box-shadow: 0 0 50px #f6a, 0 0 100px rgba(255,50,150,0.5); }
+        #start-page.pink #mode-label { color: rgba(255,100,170,0.5); }
+        #start-page.pink .mode-btn { color: rgba(255,100,170,0.4); border-color: rgba(255,100,170,0.2); }
+        #start-page.pink .mode-btn:hover { color: #f6a; border-color: #f6a; box-shadow: 0 0 15px rgba(255,100,170,0.4); }
+        #start-page.pink .mode-btn.active { background: #f6a; border-color: #f6a; box-shadow: 0 0 20px rgba(255,100,170,0.6); color: #000510; }
+        #start-page.pink input { border-color: rgba(255,100,170,0.4); box-shadow: 0 0 25px rgba(255,100,170,0.3), inset 0 0 15px rgba(255,100,170,0.15); }
+        #start-page.pink input:focus { border-color: #f6a; box-shadow: 0 0 35px #f6a, 0 0 70px rgba(255,100,170,0.4), inset 0 0 25px rgba(255,100,170,0.2); }
+        #start-page.pink #start-controls { color: rgba(255,100,170,0.6); }
+        #start-page.pink .page-footer { color: rgba(255,100,170,0.5); text-shadow: 0 0 8px rgba(255,100,170,0.3); }
         #start-controls {
             margin-top: 40px; font-size: 0.65em; opacity: 0.4; letter-spacing: 2px; color: #0ff; font-weight: bold;
         }
@@ -256,6 +286,11 @@
             <div id="start-sub">R E T R O &nbsp; F P S</div>
             <div class="start-line"></div>
             <input type="text" id="player-name" placeholder="ENTER YOUR NAME" maxlength="16" autocomplete="off">
+            <div id="mode-label">GAME MODE</div>
+            <div id="mode-selector">
+                <button class="mode-btn active" data-mode="massacre">MASSACRE</button>
+                <button class="mode-btn" data-mode="littlehen">LITTLE HEN</button>
+            </div>
             <button id="start-btn">> PLAY</button>
             <div id="start-controls">W A S D — MOVE &nbsp;|&nbsp; SPACE — JUMP &nbsp;|&nbsp; CLICK — SHOOT</div>
         </div>
@@ -306,11 +341,13 @@
 
     let scene, camera, renderer, flashLight;
     let moveForward = false, moveBackward = false, moveLeft = false, moveRight = false;
+    let isRunning = false;
     let ghosts = [], walls = [], bullets = [], explosions = [], medkits = [], weaponPickups = [], platforms = [];
     let playerHealth = 100, maxHealth = 100, kills = 0;
     let gameActive = true, isInvulnerable = false, isPaused = false;
     let currentWeapon = 'default';
     let mouseDown = false, rapidFireTimer = 0;
+    let gameMode = 'massacre';
     let texNormal, texAngry, texHappy;
     let currentMapIndex = 0, portals = [];
     let groundMesh = null;
@@ -331,8 +368,13 @@
     let trackA = null, trackB = null, currentTrack = null, musicPlaying = false;
 
     function createMusic() {
-        trackA = new Audio('MUSICA/Concrete Syntax__c95b4b99.mp3');
-        trackB = new Audio('MUSICA/Concrete Syntax__2f47737a.mp3');
+        if (gameMode === 'littlehen') {
+            trackA = new Audio('MUSICA/MUSICA LITTLE HEN/Little Hen Runs.mp3');
+            trackB = new Audio('MUSICA/MUSICA LITTLE HEN/Little Hen Fleeing.mp3');
+        } else {
+            trackA = new Audio('MUSICA/Concrete Syntax__c95b4b99.mp3');
+            trackB = new Audio('MUSICA/Concrete Syntax__2f47737a.mp3');
+        }
         trackA.preload = 'auto'; trackB.preload = 'auto';
         trackA.volume = 0.25; trackB.volume = 0.25;
         currentTrack = trackA;
@@ -768,23 +810,7 @@
             }
         }
 
-        if (currentMapIndex === 4) {
-            const hd = mapHeightData[4];
-            for (let i = 0; i < MAP_SIZE; i++) {
-                for (let j = 0; j < MAP_SIZE; j++) {
-                    const h = hd[i] ? hd[i][j] : 0;
-                    if (h > 0 && map[i][j] === 0) {
-                        const plat = new THREE.Mesh(
-                            new THREE.BoxGeometry(UNIT_SIZE, h, UNIT_SIZE),
-                            new THREE.MeshBasicMaterial({ color: theme.lightColor, transparent: true, opacity: 0.2 + h * 0.08 })
-                        );
-                        plat.position.set(i * UNIT_SIZE, h / 2, j * UNIT_SIZE);
-                        plat.userData = { isPlatform: true, height: h };
-                        scene.add(plat); platforms.push(plat);
-                    }
-                }
-            }
-        }
+        // Height platforms removed from all maps
 
         document.getElementById('mission-title').innerText = "GHOST CUBES: " + theme.title;
         document.getElementById('mission-title').style.color = theme.titleColor;
@@ -792,73 +818,95 @@
     }
 
     const portalCells = [
-        { x: 28, z: 4 },  { x: 2, z: 28 },
-        { x: 28, z: 28 }, { x: 1, z: 1 },
-        { x: 13, z: 14 }
+        [ {x:28,z:4},{x:4,z:28},{x:15,z:16},{x:3,z:6},{x:25,z:25} ],
+        [ {x:2,z:28},{x:26,z:2},{x:20,z:10},{x:9,z:10},{x:24,z:24} ],
+        [ {x:26,z:28},{x:2,z:5},{x:16,z:14},{x:8,z:22},{x:20,z:6} ],
+        [ {x:2,z:2},{x:27,z:27},{x:12,z:16},{x:3,z:28},{x:26,z:5} ],
+        [ {x:13,z:14},{x:3,z:3},{x:27,z:27},{x:2,z:26},{x:25,z:3} ]
     ];
 
     function spawnPortals() {
-        const pos = portalCells[currentMapIndex];
+        const positions = portalCells[currentMapIndex] || portalCells[0];
         const map = getMap();
-        if (map[pos.x] && map[pos.x][pos.z] === 0) {
-            createPortal(pos.x * UNIT_SIZE, pos.z * UNIT_SIZE);
-        }
+        positions.forEach(pos => {
+            if (map[pos.x] && map[pos.x][pos.z] === 0) {
+                createPortal(pos.x * UNIT_SIZE, pos.z * UNIT_SIZE);
+            }
+        });
     }
 
     function createPortal(x, z) {
         const group = new THREE.Group();
-        const emCol = [0x00ffff, 0xff6600, 0xff0000, 0xffaa00, 0xff00ff][currentMapIndex] || 0x00ffff;
+        const goldCol = 0xffcc00;
 
-        // Outer ring - bigger and thicker
-        const ringMat = new THREE.MeshBasicMaterial({ color: emCol, transparent: true, opacity: 0.95 });
-        const ring = new THREE.Mesh(new THREE.TorusGeometry(2.5, 0.3, 16, 32), ringMat);
+        // Thin gold donut (main ring)
+        const ring = new THREE.Mesh(
+            new THREE.TorusGeometry(1.2, 0.12, 8, 24),
+            new THREE.MeshBasicMaterial({ color: goldCol, transparent: true, opacity: 0.95 })
+        );
         ring.rotation.x = Math.PI / 2;
         group.add(ring);
 
-        // Inner disc
-        const inner = new THREE.Mesh(new THREE.RingGeometry(0.4, 2.3, 32), new THREE.MeshBasicMaterial({ color: emCol, transparent: true, opacity: 0.35, side: THREE.DoubleSide }));
-        inner.rotation.x = -Math.PI / 2;
-        inner.position.y = 0.05;
-        group.add(inner);
+        // Second thinner ring for depth
+        const ring2 = new THREE.Mesh(
+            new THREE.TorusGeometry(1.2, 0.06, 8, 24),
+            new THREE.MeshBasicMaterial({ color: 0xffdd44, transparent: true, opacity: 0.8 })
+        );
+        ring2.rotation.x = Math.PI / 2;
+        ring2.position.y = 0.4;
+        group.add(ring2);
 
-        // Ground glow halo
-        const haloMat = new THREE.MeshBasicMaterial({ color: emCol, transparent: true, opacity: 0.12, side: THREE.DoubleSide });
-        const halo = new THREE.Mesh(new THREE.RingGeometry(1.5, 4.0, 32), haloMat);
-        halo.rotation.x = -Math.PI / 2;
-        halo.position.y = 0.01;
-        group.add(halo);
-
-        // Side glow box
-        const glowMat = new THREE.MeshBasicMaterial({ color: emCol, transparent: true, opacity: 0.15 });
-        const glow = new THREE.Mesh(new THREE.BoxGeometry(6.0, 6.0, 0.5), glowMat);
+        // Subtle ground glow
+        const glow = new THREE.Mesh(
+            new THREE.RingGeometry(0.6, 1.8, 24),
+            new THREE.MeshBasicMaterial({ color: goldCol, transparent: true, opacity: 0.2, side: THREE.DoubleSide })
+        );
+        glow.rotation.x = -Math.PI / 2;
+        glow.position.y = 0.02;
         group.add(glow);
 
-        // Beacon beam - taller, wider
-        const beamMat = new THREE.MeshBasicMaterial({ color: emCol, transparent: true, opacity: 0.12, side: THREE.DoubleSide });
-        const beam = new THREE.Mesh(new THREE.CylinderGeometry(0.3, 2.8, 9.0, 8, 1, true), beamMat);
-        beam.position.y = 4.5;
-        group.add(beam);
-
-        // Second wider beam
-        const beam2 = new THREE.Mesh(new THREE.CylinderGeometry(1.0, 1.8, 6.0, 8, 1, true), new THREE.MeshBasicMaterial({ color: emCol, transparent: true, opacity: 0.06, side: THREE.DoubleSide }));
-        beam2.position.y = 3.0;
-        group.add(beam2);
-
-        // Orbiting particles
+        // Small floating particles
         const particles = [];
-        for (let i = 0; i < 8; i++) {
-            const pGeo = new THREE.SphereGeometry(0.12, 4, 4);
-            const pMat = new THREE.MeshBasicMaterial({ color: emCol, transparent: true, opacity: 0.7 });
-            const p = new THREE.Mesh(pGeo, pMat);
-            p.userData = { angle: (i / 8) * Math.PI * 2, radius: 1.8 + Math.random() * 1.2, speed: 0.4 + Math.random() * 0.6, yOff: (Math.random() - 0.5) * 2.5 };
+        for (let i = 0; i < 5; i++) {
+            const p = new THREE.Mesh(
+                new THREE.SphereGeometry(0.06, 4, 4),
+                new THREE.MeshBasicMaterial({ color: goldCol, transparent: true, opacity: 0.8 })
+            );
+            p.userData = { angle: (i / 5) * Math.PI * 2, radius: 1.0 + Math.random() * 0.5, speed: 0.5 + Math.random() * 0.5, yOff: (Math.random() - 0.5) * 1.2 };
             group.add(p);
             particles.push(p);
         }
 
-        group.position.set(x, 1.2, z);
-        group.userData = { active: true, particles: particles };
+        // TUNNEL label
+        if (!window._tunnelSpriteTex) {
+            const tc = document.createElement('canvas'); tc.width = 256; tc.height = 32;
+            const tctx = tc.getContext('2d');
+            tctx.fillStyle = '#ffcc00'; tctx.font = 'bold 16px "Courier New"';
+            tctx.textAlign = 'center'; tctx.shadowColor = '#ffcc00'; tctx.shadowBlur = 8;
+            tctx.fillText('TUNNEL', 128, 22);
+            window._tunnelSpriteTex = new THREE.CanvasTexture(tc);
+            window._tunnelSpriteTex.minFilter = THREE.LinearFilter;
+        }
+        const tunnelSprite = new THREE.Sprite(new THREE.SpriteMaterial({ map: window._tunnelSpriteTex, transparent: true }));
+        tunnelSprite.scale.set(5, 0.7, 1);
+        tunnelSprite.position.y = 3.0;
+        group.add(tunnelSprite);
+
+        group.position.set(x, 1.0, z);
+        group.userData = { active: true, particles };
         scene.add(group);
         portals.push(group);
+    }
+
+    function randomSpawnPos(map) {
+        const cells = [];
+        for (let i = 0; i < MAP_SIZE; i++) {
+            for (let j = 0; j < MAP_SIZE; j++) {
+                if (map[i][j] === 0) cells.push({x: i * UNIT_SIZE, z: j * UNIT_SIZE});
+            }
+        }
+        if (cells.length === 0) return {x: UNIT_SIZE, z: UNIT_SIZE};
+        return cells[Math.floor(Math.random() * cells.length)];
     }
 
     function initGame(startMap) {
@@ -866,12 +914,14 @@
         clearScene();
         buildMap();
         spawnPortals();
-        camera.position.set(1 * UNIT_SIZE, PLAYER_HEIGHT, 1 * UNIT_SIZE);
-        for (let attempt = 0; attempt < 10 && checkCollision(camera.position.x, camera.position.z); attempt++) {
-            camera.position.x += UNIT_SIZE;
-        }
+        const spawn = randomSpawnPos(getMap());
+        camera.position.set(spawn.x, PLAYER_HEIGHT, spawn.z);
         camera.rotation.set(0, 0, 0);
-        for (let i = 0; i < 50; i++) spawnGhost();
+        if (gameMode === 'littlehen') {
+            for (let i = 0; i < 25; i++) spawnGhost();
+        } else {
+            for (let i = 0; i < 80; i++) spawnGhost();
+        }
         spawnMedkits();
         spawnWeapons();
         playerHealth = maxHealth;
@@ -1029,6 +1079,23 @@
         icon.rotation.x = -Math.PI / 2;
         group.add(icon);
 
+        // GUN label
+        let gunSprite = null;
+        if (!window._gunSpriteTex) {
+            const c = document.createElement('canvas'); c.width = 128; c.height = 32;
+            const ctx = c.getContext('2d');
+            ctx.fillStyle = '#0ff'; ctx.font = 'bold 18px "Courier New"';
+            ctx.textAlign = 'center'; ctx.fillText('GUN', 64, 22);
+            ctx.shadowColor = '#0ff'; ctx.shadowBlur = 10;
+            ctx.fillText('GUN', 64, 22);
+            window._gunSpriteTex = new THREE.CanvasTexture(c);
+            window._gunSpriteTex.minFilter = THREE.LinearFilter;
+        }
+        gunSprite = new THREE.Sprite(new THREE.SpriteMaterial({ map: window._gunSpriteTex, transparent: true }));
+        gunSprite.scale.set(3.5, 0.9, 1);
+        gunSprite.position.y = 3.5;
+        group.add(gunSprite);
+
         const glow = new THREE.Mesh(new THREE.BoxGeometry(2.8, 2.8, 2.8), glowMat);
         group.add(glow);
 
@@ -1166,7 +1233,11 @@
             setTimeout(() => {
                 portals.forEach(p => p.userData.active = true);
             }, 2000);
-            for (let i = 0; i < 50; i++) spawnGhost();
+            if (gameMode === 'littlehen') {
+                for (let i = 0; i < 25; i++) spawnGhost();
+            } else {
+            for (let i = 0; i < 80; i++) spawnGhost();
+            }
             spawnMedkits();
             spawnWeapons();
             camera.position.set(pp.tx, PLAYER_HEIGHT, pp.tz);
@@ -1181,7 +1252,7 @@
             return;
         }
 
-        const speed = 0.15;
+        const speed = isRunning ? 0.27 : 0.15;
         const moveDir = new THREE.Vector3();
         const front = new THREE.Vector3();
         const side = new THREE.Vector3();
@@ -1339,8 +1410,8 @@
                 if (dist < 2.5 && !pendingPortal) {
                     let dest;
                     do { dest = Math.floor(Math.random() * MAP_COUNT); } while (dest === currentMapIndex);
-                    const sp = {x:1,z:1};
-                    pendingPortal = { targetMap: dest, tx: sp.x * UNIT_SIZE, tz: sp.z * UNIT_SIZE };
+            const sp = randomSpawnPos(getMap());
+            pendingPortal = { targetMap: dest, tx: sp.x, tz: sp.z };
                 }
             }
         });
@@ -1592,6 +1663,7 @@
         window.onkeydown = (e) => {
             if (e.code === 'Escape') { togglePause(); return; }
             if(isPaused) return;
+            if(e.code === 'ShiftLeft' || e.code === 'ShiftRight') isRunning = true;
             if(e.code === 'KeyW' || e.code === 'ArrowUp') moveForward = true;
             if(e.code === 'KeyS' || e.code === 'ArrowDown') moveBackward = true;
             if(e.code === 'KeyA' || e.code === 'ArrowLeft') moveLeft = true;
@@ -1600,6 +1672,7 @@
         };
 
         window.onkeyup = (e) => {
+            if(e.code === 'ShiftLeft' || e.code === 'ShiftRight') isRunning = false;
             if(e.code === 'KeyW' || e.code === 'ArrowUp') moveForward = false;
             if(e.code === 'KeyS' || e.code === 'ArrowDown') moveBackward = false;
             if(e.code === 'KeyA' || e.code === 'ArrowLeft') moveLeft = false;
@@ -1647,6 +1720,19 @@
         })('particles-pause', 20, ['#0ff','#f0f','rgba(0,255,255,0.4)','rgba(255,0,255,0.4)']);
 
         document.getElementById('restart-btn').addEventListener('click', () => location.reload());
+
+        // Game mode selector
+        document.querySelectorAll('.mode-btn').forEach(btn => {
+            btn.addEventListener('click', function() {
+                document.querySelectorAll('.mode-btn').forEach(b => b.classList.remove('active'));
+                this.classList.add('active');
+                gameMode = this.dataset.mode;
+                const sp = document.getElementById('start-page');
+                if (gameMode === 'littlehen') sp.classList.add('pink');
+                else sp.classList.remove('pink');
+            });
+        });
+
         document.getElementById('start-btn').addEventListener('click', () => {
             const inp = document.getElementById('player-name');
             playerName = inp.value.trim() || 'ANON';
