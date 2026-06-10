@@ -10,6 +10,7 @@ A cyberpunk-horror first-person shooter built with Three.js. Hunt ghost cubes ac
 |------|------|-------------|
 | **Aerial Map Viewer** | [Open →](https://eduardofierroduque-sudo.github.io/ghost-cubes/vista-aerea-juego.html) | Top-down view of all 5 maps with element indicators |
 | **Ghost Catalog** | [Open →](https://eduardofierroduque-sudo.github.io/ghost-cubes/catalogo-fantasmas.html) | Interactive 3D renders of all 15 ghost variants |
+| **Weapon Arsenal** | [Open →](https://eduardofierroduque-sudo.github.io/ghost-cubes/catalogo-armas.html) | 3D weapon catalog with stats for all 7 weapons |
 
 ---
 
