@@ -1,0 +1,203 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Ghost Cubes - Weapon Catalog</title>
+<style>
+*{margin:0;padding:0;box-sizing:border-box}
+body{background:#000510;color:#0ff;font-family:"Courier New",monospace;overflow-y:auto}
+@keyframes floatUp{0%{transform:translateY(110vh) scale(0);opacity:0}15%{opacity:1}85%{opacity:.6}100%{transform:translateY(-10vh) scale(1.5);opacity:0}}
+@keyframes glitchCat{0%,94%,100%{clip-path:none;text-shadow:0 0 40px #0ff,0 0 80px #0ff44,4px 0 #f0f;transform:none;filter:none}2%{text-shadow:5px 0 #f0f,-5px 0 #0ff;transform:skew(.8deg);filter:hue-rotate(12deg)}4%{clip-path:none;text-shadow:0 0 40px #0ff,0 0 80px #0ff44,4px 0 #f0f;transform:none;filter:none}49%{text-shadow:-4px 0 #f0f,3px 0 #0ff;transform:skew(-.5deg);filter:hue-rotate(-8deg)}51%{text-shadow:0 0 40px #0ff,0 0 80px #0ff44,4px 0 #f0f;transform:none;filter:none}78%{text-shadow:3px 0 #f0f,-2px 0 #0ff;transform:translateX(1px);filter:hue-rotate(6deg)}80%{text-shadow:0 0 40px #0ff,0 0 80px #0ff44,4px 0 #f0f;transform:none;filter:none}}
+.particles{position:fixed;top:0;left:0;width:100%;height:100%;pointer-events:none;z-index:0;overflow:hidden}
+.particle{position:absolute;border-radius:50%;pointer-events:none;animation:floatUp linear infinite}
+#header{position:relative;z-index:1;text-align:center;padding:30px 10px 15px}
+#header h1{font-size:3em;font-weight:900;text-shadow:0 0 40px #0ff,0 0 80px #0ff44,3px 3px 0 rgba(0,0,0,.8),5px 0 #f0f44;letter-spacing:14px;animation:glitchCat 5s infinite}
+#header p{font-size:.72em;opacity:.4;margin-top:5px;letter-spacing:4px;font-weight:bold}
+#grid{position:relative;z-index:1;display:flex;flex-wrap:wrap;justify-content:center;gap:18px;padding:20px;max-width:1150px;margin:0 auto}
+.card{background:rgba(0,10,20,.5);border:1px solid rgba(0,255,255,.12);width:320px;padding:14px;text-align:center;transition:.2s;backdrop-filter:blur(12px);-webkit-backdrop-filter:blur(12px)}
+.card:hover{border-color:rgba(0,255,255,.4);box-shadow:0 8px 30px rgba(0,0,0,.5),0 0 30px #0ff22}
+.card canvas{display:block;margin:0 auto}
+.card .name{font-size:1.2em;font-weight:900;margin:8px 0 4px;letter-spacing:4px}
+.card .desc{font-size:.7em;opacity:.6;margin-bottom:8px;letter-spacing:2px}
+.card .stats{font-size:.7em;line-height:1.8;text-align:left;padding:8px 12px;background:rgba(0,0,0,.3);border:1px solid rgba(0,255,255,.06)}
+.card .stats span{font-weight:bold}
+.page-footer{text-align:center;padding:20px;font-size:.65em;color:rgba(0,255,255,.25);letter-spacing:4px;font-weight:bold}
+</style>
+</head>
+<body>
+<div class="particles" id="particles-cat"></div>
+<div id="header">
+    <h1>ARSENAL</h1>
+    <p>GHOST CUBES &mdash; WEAPON CATALOG &mdash; 7 WEAPONS</p>
+</div>
+<div id="grid"></div>
+<script type="module">
+import * as THREE from 'https://unpkg.com/three@0.132.2/build/three.module.js';
+
+const weapons = [
+    { type:'default', name:'DEFAULT', color:0x00ff88, emit:0x00ff88, desc:'Standard sidearm. Single shot, green tracer.', dmg:'1 HP', rof:'Per click', special:'None' },
+    { type:'rapid', name:'RAPID', color:0x00ff88, emit:0x00ff88, desc:'Burst-fire SMG. 3 bullets every 5 frames.', dmg:'1 HP x3', rof:'Hold fire', special:'Triple burst' },
+    { type:'bomb', name:'BOMB', color:0xaa00ff, emit:0xcc00ff, desc:'Slow purple orb. Explodes on impact.', dmg:'1 HP AoE', rof:'Per click', special:'4u blast radius' },
+    { type:'shotgun', name:'SHOTGUN', color:0xff6600, emit:0xff4400, desc:'Wide spread. 5 pellets per shot.', dmg:'5x 1 HP', rof:'Per click', special:'Scatter shot' },
+    { type:'laser', name:'LASER', color:0xff0044, emit:0xff0044, desc:'Continuous red beam. Fires every 4 frames.', dmg:'1 HP', rof:'Hold fire (4f)', special:'Auto-fire' },
+    { type:'ray', name:'RAY', color:0x44ff00, emit:0x44ff00, desc:'Piercing green bolt. Hits multiple ghosts.', dmg:'1 HP (pierce)', rof:'Per click', special:'Penetrating' },
+    { type:'nuke', name:'NUKE', color:0xffffff, emit:0xffffff, desc:'ONE SHOT. Instant player-centered white shockwave destroys ALL ghosts in 8u radius. Reverts to previous weapon.', dmg:'INSTANT KILL (8u)', rof:'Single use', special:'Radial shockwave / 1-shot' }
+];
+
+const grid = document.getElementById('grid');
+
+(function(){
+    var c = document.getElementById('particles-cat');
+    for (var i = 0; i < 25; i++) {
+        var p = document.createElement('div');
+        p.className = 'particle';
+        var col = ['#0ff','#f0f','rgba(0,255,255,.5)','rgba(255,0,255,.5)'][Math.floor(Math.random()*4)];
+        var s = 1 + Math.random() * 3;
+        p.style.cssText = 'left:'+(Math.random()*100)+'%;width:'+s+'px;height:'+s+'px;background:'+col+';box-shadow:0 0 '+s*2+'px '+col+';animation-duration:'+(10+Math.random()*16)+'s;animation-delay:'+(Math.random()*14)+'s;opacity:'+(.15+Math.random()*.35);
+        c.appendChild(p);
+    }
+})();
+
+weapons.forEach(w => {
+    const card = document.createElement('div');
+    card.className = 'card';
+
+    const name = document.createElement('div');
+    name.className = 'name';
+    name.style.color = '#' + w.emit.toString(16).padStart(6,'0');
+    name.style.textShadow = '0 0 16px ' + '#' + w.emit.toString(16).padStart(6,'0');
+    name.textContent = w.name;
+    card.appendChild(name);
+
+    const desc = document.createElement('div');
+    desc.className = 'desc';
+    desc.textContent = w.desc;
+    card.appendChild(desc);
+
+    const canvas = document.createElement('canvas');
+    canvas.width = 280; canvas.height = 240;
+    card.appendChild(canvas);
+
+    const stats = document.createElement('div');
+    stats.className = 'stats';
+    stats.innerHTML = '<span style="color:#ff0">Damage:</span> ' + w.dmg + '<br>' +
+        '<span style="color:#0ff">Rate:</span> ' + w.rof + '<br>' +
+        '<span style="color:#f0f">Special:</span> ' + w.special;
+    card.appendChild(stats);
+
+    grid.appendChild(card);
+
+    setTimeout(() => {
+        const renderer = new THREE.WebGLRenderer({ canvas, antialias: true, alpha: true });
+        renderer.setSize(280, 240);
+        renderer.setClearColor(0x000000, 0);
+        const scene = new THREE.Scene();
+        const cam = new THREE.PerspectiveCamera(35, 280/240, 0.1, 30);
+        cam.position.set(0, 1.5, 6);
+        cam.lookAt(0, 0.5, 0);
+
+        const ambient = new THREE.AmbientLight(0xffffff, 0.6);
+        scene.add(ambient);
+
+        const glowColor = w.emit;
+        const s = 1.15;
+        const group = new THREE.Group();
+        const darkMetal = new THREE.MeshBasicMaterial({ color: 0x2a2a2a });
+        const midMetal = new THREE.MeshBasicMaterial({ color: 0x444444 });
+        const wornMetal = new THREE.MeshBasicMaterial({ color: 0x555555 });
+        const accentMat = new THREE.MeshBasicMaterial({ color: glowColor, transparent: true, opacity: 0.85 });
+        const accentGlow = new THREE.MeshBasicMaterial({ color: glowColor, transparent: true, opacity: 0.3 });
+
+        // QUAKE-STYLE HEAVY PULSE HAND CANNON
+        const grip = new THREE.Mesh(new THREE.CylinderGeometry(0.18*s, 0.22*s, 1.3*s, 8), darkMetal);
+        grip.position.y = -0.55*s; group.add(grip);
+        const gripRing = new THREE.Mesh(new THREE.TorusGeometry(0.2*s, 0.04*s, 6, 8), wornMetal);
+        gripRing.position.y = -0.1*s; group.add(gripRing);
+        const gripButt = new THREE.Mesh(new THREE.CylinderGeometry(0.22*s, 0.28*s, 0.3*s, 8), midMetal);
+        gripButt.position.y = -1.15*s; group.add(gripButt);
+        const body = new THREE.Mesh(new THREE.CylinderGeometry(0.25*s, 0.35*s, 1.2*s, 8), midMetal);
+        body.position.y = 0.3*s; group.add(body);
+        const bodyPanel = new THREE.Mesh(new THREE.BoxGeometry(0.35*s, 0.8*s, 0.35*s), darkMetal);
+        bodyPanel.position.y = 0.3*s; group.add(bodyPanel);
+        const chamberRing1 = new THREE.Mesh(new THREE.TorusGeometry(0.38*s, 0.06*s, 6, 12), wornMetal);
+        chamberRing1.position.y = 0.05*s; group.add(chamberRing1);
+        const chamberRing2 = new THREE.Mesh(new THREE.TorusGeometry(0.38*s, 0.04*s, 6, 12), accentMat);
+        chamberRing2.position.y = 0.65*s; group.add(chamberRing2);
+        for (let i = 0; i < 4; i++) {
+            const a = (i/4)*Math.PI*2;
+            const rivet = new THREE.Mesh(new THREE.CylinderGeometry(0.04*s, 0.04*s, 0.15*s, 6), wornMetal);
+            rivet.position.set(Math.cos(a)*0.35*s, 0.3*s, Math.sin(a)*0.35*s); group.add(rivet);
+        }
+        const barrelBase = new THREE.Mesh(new THREE.CylinderGeometry(0.14*s, 0.22*s, 0.6*s, 8), midMetal);
+        barrelBase.rotation.z = Math.PI/2; barrelBase.position.set(0.55*s, 0.15*s, 0); group.add(barrelBase);
+        const barrel = new THREE.Mesh(new THREE.CylinderGeometry(0.08*s, 0.12*s, 1.0*s, 8), darkMetal);
+        barrel.rotation.z = Math.PI/2; barrel.position.set(1.1*s, 0.15*s, 0); group.add(barrel);
+        for (let i = 0; i < 3; i++) {
+            const rRing = new THREE.Mesh(new THREE.TorusGeometry(0.1*s, 0.03*s, 6, 8), wornMetal);
+            rRing.position.set(0.8*s + i*0.3*s, 0.15*s, 0); group.add(rRing);
+        }
+        const nozzle = new THREE.Mesh(new THREE.CylinderGeometry(0.06*s, 0.13*s, 0.25*s, 8), accentMat);
+        nozzle.rotation.z = Math.PI/2; nozzle.position.set(1.55*s, 0.15*s, 0); group.add(nozzle);
+        const nozzleGlow = new THREE.Mesh(new THREE.TorusGeometry(0.14*s, 0.04*s, 6, 8), accentGlow);
+        nozzleGlow.position.set(1.68*s, 0.15*s, 0); group.add(nozzleGlow);
+        const cable1 = new THREE.Mesh(new THREE.TorusGeometry(0.25*s, 0.03*s, 4, 8), accentMat);
+        cable1.position.set(0, 0.8*s, 0.2*s); cable1.rotation.x = 0.3; group.add(cable1);
+        const cable2 = cable1.clone(); cable2.position.z = -0.2*s; cable2.rotation.x = -0.3; group.add(cable2);
+
+        if (w.type === 'rapid') {
+            const mag = new THREE.Mesh(new THREE.BoxGeometry(0.2*s, 0.5*s, 0.2*s), accentMat);
+            mag.position.set(0, -0.6*s, 0.22*s); group.add(mag);
+            const feed = new THREE.Mesh(new THREE.CylinderGeometry(0.04*s, 0.04*s, 0.3*s, 6), wornMetal);
+            feed.position.set(0, 0.7*s, 0.25*s); group.add(feed);
+        } else if (w.type === 'shotgun') {
+            const s1 = new THREE.Mesh(new THREE.CylinderGeometry(0.04*s, 0.04*s, 0.8*s, 6), darkMetal);
+            s1.rotation.z = Math.PI/2; s1.position.set(1.35*s, 0.3*s, 0.1*s); group.add(s1);
+            const s2 = s1.clone(); s2.position.z = -0.1*s; group.add(s2);
+            const brace = new THREE.Mesh(new THREE.BoxGeometry(0.15*s, 0.08*s, 0.3*s), wornMetal);
+            brace.position.set(1.35*s, 0.3*s, 0); group.add(brace);
+        } else if (w.type === 'laser') {
+            const coil = new THREE.Mesh(new THREE.TorusGeometry(0.2*s, 0.04*s, 8, 16), accentMat);
+            coil.position.set(0.8*s, 0.15*s, 0); coil.rotation.y = Math.PI/2; group.add(coil);
+            const coil2 = coil.clone(); coil2.scale.set(0.7, 0.7, 0.7); coil2.position.x = 0.5*s; group.add(coil2);
+        } else if (w.type === 'ray') {
+            const crystal = new THREE.Mesh(new THREE.OctahedronGeometry(0.2*s, 0), accentGlow);
+            crystal.position.set(1.65*s, 0.15*s, 0); group.add(crystal);
+            const prong1 = new THREE.Mesh(new THREE.CylinderGeometry(0.02*s, 0.04*s, 0.3*s, 6), wornMetal);
+            prong1.position.set(1.5*s, 0.25*s, 0.08*s); prong1.rotation.z = 0.3; group.add(prong1);
+            const prong2 = prong1.clone(); prong2.position.z = -0.08*s; prong2.rotation.z = -0.3; group.add(prong2);
+        } else if (w.type === 'nuke') {
+            const core = new THREE.Mesh(new THREE.SphereGeometry(0.4*s, 12, 12), new THREE.MeshBasicMaterial({ color: 0xffffff }));
+            core.position.set(0.2*s, 0.3*s, 0); group.add(core);
+            const coreGlow = new THREE.Mesh(new THREE.SphereGeometry(0.55*s, 12, 12), new THREE.MeshBasicMaterial({ color: 0xffffff, transparent: true, opacity: 0.3 }));
+            coreGlow.position.copy(core.position); group.add(coreGlow);
+            const nukeRing = new THREE.Mesh(new THREE.TorusGeometry(0.5*s, 0.08*s, 8, 16), new THREE.MeshBasicMaterial({ color: 0xffffff, transparent: true, opacity: 0.7 }));
+            nukeRing.rotation.x = Math.PI/2; nukeRing.position.y = 0.3*s; group.add(nukeRing);
+            const stripe1 = new THREE.Mesh(new THREE.BoxGeometry(0.08*s, 0.6*s, 0.04*s), new THREE.MeshBasicMaterial({ color: 0xff8800 }));
+            stripe1.position.set(0, 0.3*s, 0.28*s); group.add(stripe1);
+            const stripe2 = stripe1.clone(); stripe2.position.z = -0.28*s; group.add(stripe2);
+        } else {
+            const plate = new THREE.Mesh(new THREE.BoxGeometry(0.12*s, 0.6*s, 0.35*s), wornMetal);
+            plate.position.set(0, 0.3*s, 0); group.add(plate);
+        }
+
+        group.rotation.y = -0.2;
+        scene.add(group);
+
+        function render() {
+            requestAnimationFrame(render);
+            group.rotation.y += 0.01;
+            group.position.y = Math.sin(Date.now()*0.002) * 0.15;
+            renderer.render(scene, cam);
+        }
+        render();
+    }, 30);
+});
+
+const footer = document.createElement('div');
+footer.className = 'page-footer';
+footer.textContent = 'Ghost Cubes · Weapon Arsenal · www.fierroduque.com';
+document.body.appendChild(footer);
+</script>
+</body>
+</html>

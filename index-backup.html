@@ -720,30 +720,12 @@
         const canvas = document.createElement('canvas');
         canvas.width = 64; canvas.height = 64;
         const ctx = canvas.getContext('2d');
-        ctx.fillStyle = '#FFF'; ctx.fillRect(0,0,64,64);
-        ctx.fillStyle = '#000';
-
-        if(type === 'happy') {
-            // SCOUT: vertical slit eyes + stitched mouth
-            ctx.fillRect(16,18,6,14); ctx.fillRect(42,18,6,14);
-            ctx.fillRect(20,44,24,4);
-            for (let x = 22; x < 44; x += 6) { ctx.fillRect(x,40,3,12); }
-        } else if(type === 'angry') {
-            // TANK: square grid eyes + equalizer mouth
-            ctx.fillRect(10,16,14,14); ctx.fillRect(40,16,14,14);
-            ctx.fillStyle = '#FFF'; ctx.fillRect(12,18,10,1); ctx.fillRect(42,18,10,1);
-            ctx.fillRect(12,24,10,1); ctx.fillRect(42,24,10,1);
-            ctx.fillStyle = '#000';
-            const bars = [6,10,4,14,8,12,5,7];
-            for (let i = 0; i < bars.length; i++) { ctx.fillRect(14+i*5, 50-bars[i]/2, 3, bars[i]); }
-        } else {
-            // SOLDIER: hollow square eyes + pixel tears + open square mouth
-            ctx.strokeStyle = '#000'; ctx.lineWidth = 3;
-            ctx.strokeRect(13,17,12,12); ctx.strokeRect(39,17,12,12);
-            for (let y = 32; y < 48; y += 2) { ctx.fillRect(18,y,2,2); ctx.fillRect(44,y,2,2); }
-            ctx.fillRect(17,30,1,1); ctx.fillRect(20,31,2,1); ctx.fillRect(43,30,1,1); ctx.fillRect(46,31,2,1);
-            ctx.strokeRect(24,46,16,10);
-        }
+        ctx.fillStyle = base; ctx.fillRect(0,0,64,64);
+        ctx.fillStyle = eyes; ctx.fillRect(14,20,10,10); ctx.fillRect(40,20,10,10);
+        ctx.fillStyle = "#000";
+        if(type === 'happy') { ctx.fillRect(22,45,20,4); ctx.fillRect(20,41,4,4); ctx.fillRect(40,41,4,4); }
+        else if(type === 'angry') { ctx.fillRect(24,48,16,4); }
+        else { ctx.fillRect(22,48,4,4); ctx.fillRect(38,48,4,4); ctx.fillRect(26,52,12,4); }
         const tex = new THREE.CanvasTexture(canvas);
         tex.magFilter = THREE.NearestFilter;
         return tex;
@@ -770,9 +752,9 @@
         camera.add(flashLight);
         scene.add(camera);
 
-        texNormal = generateFace("#FFF", "#000", 'normal');
-        texAngry = generateFace("#FFF", "#000", 'angry');
-        texHappy = generateFace("#FFF", "#000", 'happy');
+        texNormal = generateFace("#FFF", "#0FF", 'normal');
+        texAngry = generateFace("#F00", "#FF0", 'angry');
+        texHappy = generateFace("#FF0", "#0FF", 'happy');
 
         initGame();
         setupControls();
@@ -1615,32 +1597,9 @@
         const cellX = Math.floor(pos.x / UNIT_SIZE);
         const cellZ = Math.floor(pos.z / UNIT_SIZE);
         const gh = getHeightAt(cellX, cellZ);
+        const geo = new THREE.BoxGeometry(size, size*1.2, size);
         const mat = new THREE.MeshBasicMaterial({ map: texMap, color: col });
-
-        let g;
-        if (gc.tex === 'happy') {
-            // SCOUT: elongated cube
-            const geo = new THREE.BoxGeometry(size*0.7, size*1.4, size*0.7);
-            g = new THREE.Mesh(geo, mat);
-        } else if (gc.tex === 'angry') {
-            // TANK: cube cluster
-            g = new THREE.Group();
-            const core = new THREE.Mesh(new THREE.BoxGeometry(size, size, size), mat);
-            g.add(core);
-            const corners = [[size*0.45,size*0.4,size*0.4],[-size*0.4,size*0.5,-size*0.35],[size*0.4,-size*0.45,size*0.35],[-size*0.5,-size*0.4,-size*0.45],[size*0.5,size*0.35,-size*0.5]];
-            corners.forEach(([dx,dy,dz]) => {
-                const sub = new THREE.Mesh(new THREE.BoxGeometry(size*0.35, size*0.35, size*0.35), mat.clone());
-                sub.position.set(dx, dy, dz); g.add(sub);
-            });
-        } else {
-            // SOLDIER: perfect cube + sub-cube
-            g = new THREE.Group();
-            const main = new THREE.Mesh(new THREE.BoxGeometry(size, size, size), mat);
-            g.add(main);
-            const sub = new THREE.Mesh(new THREE.BoxGeometry(size*0.35, size*0.35, size*0.35), mat.clone());
-            sub.position.set(-size*0.45, -size*0.5, 0); g.add(sub);
-        }
-
+        const g = new THREE.Mesh(geo, mat);
         g.position.set(pos.x, gh + size/2 + 0.5, pos.z);
         g.userData = { health: hp, speed: spd, baseY: gh };
         scene.add(g); ghosts.push(g);
