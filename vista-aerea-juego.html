@@ -23,10 +23,14 @@ canvas{width:100%;height:100%;display:block}
 .medkit-dot{color:#0f0;text-shadow:0 0 10px #0f0}
 .weapon-dot{color:#f0f;text-shadow:0 0 10px #f0f}
 .spawn-dot{color:#ff0;text-shadow:0 0 10px #ff0}
+.back-btn{position:fixed;top:20px;left:25px;color:rgba(0,255,255,.4);text-decoration:none;font-size:.75em;font-weight:900;letter-spacing:3px;transition:.2s;z-index:100;background:rgba(0,5,10,.7);padding:8px 16px;border:1px solid rgba(0,255,255,.15);backdrop-filter:blur(10px)}
+.back-btn:hover{color:#0ff;text-shadow:0 0 10px #0ff}
 </style>
 </head>
 <body>
-<div id="game-container"><div class="particles" id="particles-aerial"></div><div id="map-selector"><button class="map-btn active" data-map="0">CELESTIAL CRYPT</button><button class="map-btn" data-map="1">AMBER ABYSS</button><button class="map-btn" data-map="2">ALABASTER LABYRINTH</button><button class="map-btn" data-map="3">STEPPED BASTION</button><button class="map-btn" data-map="4">KALEIDOSCOPE PRISM</button></div><div id="legend"><span class="leg-item"><span class="leg-dot portal-dot">&#9679;</span> Portal</span><span class="leg-item"><span class="leg-dot medkit-dot">+</span> Medkit</span><span class="leg-item"><span class="leg-dot weapon-dot">&#9632;</span> Weapon</span><span class="leg-item"><span class="leg-dot spawn-dot">&#9650;</span> Spawn</span></div><canvas id="mazeCanvas"></canvas></div>
+<div id="game-container"><div class="particles" id="particles-aerial"></div>
+<a href="index.html" class="back-btn">&#x2190; BACK TO GAME</a>
+<div id="map-selector"><button class="map-btn active" data-map="0">CELESTIAL CRYPT</button><button class="map-btn" data-map="1">AMBER ABYSS</button><button class="map-btn" data-map="2">ALABASTER LABYRINTH</button><button class="map-btn" data-map="3">STEPPED BASTION</button><button class="map-btn" data-map="4">KALEIDOSCOPE PRISM</button></div><div id="legend"><span class="leg-item"><span class="leg-dot portal-dot">&#9679;</span> Portal</span><span class="leg-item"><span class="leg-dot medkit-dot">+</span> Medkit</span><span class="leg-item"><span class="leg-dot weapon-dot">&#9632;</span> Weapon</span><span class="leg-item"><span class="leg-dot spawn-dot">&#9650;</span> Spawn</span></div><canvas id="mazeCanvas"></canvas></div>
 <script type="module">
 import * as THREE from "https://unpkg.com/three@0.132.2/build/three.module.js";
 const UNIT_SIZE=5,MAP_SIZE=30,MAP_COUNT=5;

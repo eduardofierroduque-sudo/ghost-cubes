@@ -194,6 +194,18 @@
         #start-controls {
             margin-top: 40px; font-size: 0.65em; opacity: 0.4; letter-spacing: 2px; color: #0ff; font-weight: bold;
         }
+        #nav-links {
+            margin-top: 32px; font-size: 0.72em; letter-spacing: 3px; font-weight: 900;
+            display: flex; gap: 14px; justify-content: center; z-index: 1; position: relative;
+        }
+        #nav-links a {
+            color: rgba(0,255,255,0.45); text-decoration: none; transition: 0.2s;
+        }
+        #nav-links a:hover { color: #0ff; text-shadow: 0 0 12px #0ff; }
+        #nav-links span { color: rgba(0,255,255,0.15); }
+        #start-page.pink #nav-links a { color: rgba(255,100,170,0.45); }
+        #start-page.pink #nav-links a:hover { color: #f6a; text-shadow: 0 0 12px #f6a; }
+        #start-page.pink #nav-links span { color: rgba(255,100,170,0.15); }
         .page-footer {
             position: absolute; bottom: 20px; left: 0; width: 100%; text-align: center;
             font-size: 0.95em; color: rgba(120,255,255,0.75); letter-spacing: 3px;
@@ -297,6 +309,13 @@
             </div>
             <button id="start-btn" disabled>> PLAY</button>
             <div id="start-controls">W A S D — MOVE &nbsp;|&nbsp; SPACE — JUMP &nbsp;|&nbsp; CLICK — SHOOT</div>
+        </div>
+        <div id="nav-links">
+            <a href="vista-aerea-juego.html">MAPS</a>
+            <span>|</span>
+            <a href="catalogo-fantasmas.html">GHOSTS</a>
+            <span>|</span>
+            <a href="catalogo-armas.html">WEAPONS</a>
         </div>
         <div class="page-footer">Created by www.fierroduque.com</div>
     </div>
