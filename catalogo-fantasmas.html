@@ -3,271 +3,147 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Ghost Cubes - Ghost Catalog</title>
+<title>Ghost Cubes — Complete Bestiary</title>
 <style>
 *{margin:0;padding:0;box-sizing:border-box}
 body{background:#000510;color:#0ff;font-family:"Courier New",monospace;overflow-y:auto}
 @keyframes floatUp{0%{transform:translateY(110vh) scale(0);opacity:0}15%{opacity:1}85%{opacity:.6}100%{transform:translateY(-10vh) scale(1.5);opacity:0}}
-@keyframes glitchCat{0%,94%,100%{text-shadow:0 0 40px #0ff,0 0 80px #0ff44,4px 0 #f0f;transform:none;filter:none}2%{text-shadow:5px 0 #f0f,-5px 0 #0ff;transform:skew(.8deg);filter:hue-rotate(12deg)}4%{text-shadow:0 0 40px #0ff,0 0 80px #0ff44,4px 0 #f0f;transform:none;filter:none}49%{text-shadow:-4px 0 #f0f,3px 0 #0ff;transform:skew(-.5deg);filter:hue-rotate(-8deg)}51%{text-shadow:0 0 40px #0ff,0 0 80px #0ff44,4px 0 #f0f;transform:none;filter:none}78%{text-shadow:3px 0 #f0f,-2px 0 #0ff;transform:translateX(1px);filter:hue-rotate(6deg)}80%{text-shadow:0 0 40px #0ff,0 0 80px #0ff44,4px 0 #f0f;transform:none;filter:none}}
+@keyframes glitch{0%,94%,100%{text-shadow:0 0 40px #0ff,0 0 80px #0ff44,4px 0 #f0f;transform:none;filter:none}2%{text-shadow:5px 0 #f0f,-5px 0 #0ff;transform:skew(.8deg);filter:hue-rotate(12deg)}4%{text-shadow:0 0 40px #0ff,0 0 80px #0ff44,4px 0 #f0f;transform:none;filter:none}49%{text-shadow:-4px 0 #f0f,3px 0 #0ff;transform:skew(-.5deg);filter:hue-rotate(-8deg)}51%{text-shadow:0 0 40px #0ff,0 0 80px #0ff44,4px 0 #f0f;transform:none;filter:none}78%{text-shadow:3px 0 #f0f,-2px 0 #0ff;transform:translateX(1px);filter:hue-rotate(6deg)}80%{text-shadow:0 0 40px #0ff,0 0 80px #0ff44,4px 0 #f0f;transform:none;filter:none}}
 .particles{position:fixed;top:0;left:0;width:100%;height:100%;pointer-events:none;z-index:0;overflow:hidden}
 .particle{position:absolute;border-radius:50%;pointer-events:none;animation:floatUp linear infinite}
-#header{position:relative;z-index:1;text-align:center;padding:30px 10px 15px}
-#header h1{font-size:3em;font-weight:900;text-shadow:0 0 40px #0ff,0 0 80px #0ff44,3px 3px 0 rgba(0,0,0,.8),5px 0 #f0f44;letter-spacing:14px;animation:glitchCat 5s infinite}
-#header p{font-size:.72em;opacity:.4;margin-top:5px;letter-spacing:4px;font-weight:bold}
-#grid{position:relative;z-index:1;display:flex;flex-wrap:wrap;justify-content:center;gap:16px;padding:15px;max-width:1340px;margin:0 auto}
-.card{background:rgba(0,10,20,.5);border:1px solid rgba(0,255,255,.12);width:235px;padding:12px;text-align:center;transition:.2s;backdrop-filter:blur(12px);-webkit-backdrop-filter:blur(12px)}
-.card:hover{border-color:rgba(0,255,255,.4);box-shadow:0 8px 30px rgba(0,0,0,.5),0 0 30px #0ff22}
-.card h3{font-size:.68em;color:#ff0;text-shadow:0 0 8px #ff0;letter-spacing:3px;margin-bottom:6px;font-weight:900}
-.card canvas{display:block;margin:0 auto}
-.card .name{font-size:.95em;font-weight:900;margin:6px 0 2px;letter-spacing:3px}
-.card .type{font-size:.65em;text-transform:uppercase;letter-spacing:3px;margin-bottom:8px;font-weight:bold}
-.card .stats{font-size:.65em;line-height:1.8;text-align:left;padding:6px 10px;background:rgba(0,0,0,.3);border:1px solid rgba(0,255,255,.06)}
-.card .stats span{color:#f0f;text-shadow:0 0 6px #f0f;font-weight:bold}
-.map-label{width:100%;text-align:center;padding:24px 0 5px;font-size:.8em;color:rgba(0,255,255,.5);letter-spacing:5px;text-shadow:0 0 12px #0ff;font-weight:900}
-#attack-info{position:relative;z-index:1;max-width:1240px;margin:25px auto;padding:20px 30px;border:1px solid rgba(0,255,255,.15);background:rgba(0,10,20,.5);font-size:.75em;line-height:2.2;backdrop-filter:blur(12px);-webkit-backdrop-filter:blur(12px)}
-#attack-info h2{color:#f0f;text-shadow:0 0 15px #f0f;margin-bottom:10px;letter-spacing:5px;font-weight:900}
-#attack-info code{color:#ff0;background:rgba(0,0,0,.5);padding:2px 8px;font-weight:bold}
-.back-btn{position:fixed;top:20px;left:25px;color:rgba(0,255,255,.4);text-decoration:none;font-size:.75em;font-weight:900;letter-spacing:3px;transition:.2s;z-index:100;background:rgba(0,5,10,.7);padding:8px 16px;border:1px solid rgba(0,255,255,.15);backdrop-filter:blur(10px)}
+.back-btn{position:fixed;top:16px;left:20px;color:rgba(0,255,255,.35);text-decoration:none;font-size:.7em;font-weight:900;letter-spacing:3px;transition:.2s;z-index:100;background:rgba(0,5,10,.7);padding:7px 14px;border:1px solid rgba(0,255,255,.1);backdrop-filter:blur(10px)}
 .back-btn:hover{color:#0ff;text-shadow:0 0 10px #0ff}
-.page-footer{text-align:center;padding:20px;font-size:.65em;color:rgba(0,255,255,.25);letter-spacing:4px;font-weight:bold}
+#header{position:relative;z-index:1;text-align:center;padding:30px 10px 8px}
+#header h1{font-size:2em;font-weight:900;text-shadow:0 0 30px #0ff,0 0 60px #0ff44,3px 3px 0 rgba(0,0,0,.8);letter-spacing:10px;animation:glitch 5s infinite}
+#header p{font-size:.62em;opacity:.3;margin-top:4px;letter-spacing:4px;font-weight:bold}
+.map-section{position:relative;z-index:1;max-width:1150px;margin:0 auto;padding:0 15px}
+.map-title{text-align:center;padding:18px 0 6px;font-size:.78em;font-weight:900;letter-spacing:5px;color:rgba(0,255,255,.3)}
+.row{display:flex;flex-wrap:wrap;justify-content:center;gap:12px;margin-bottom:8px}
+.mini-card{background:rgba(0,10,20,.45);border:1px solid rgba(0,255,255,.08);width:215px;text-align:center;backdrop-filter:blur(10px);-webkit-backdrop-filter:blur(10px)}
+.mini-card canvas{display:block;margin:0 auto}
+.mini-card .label{padding:4px 8px 8px;font-size:.6em;font-weight:900;letter-spacing:3px;border-top:1px solid rgba(0,255,255,.04)}
+.page-footer{position:relative;z-index:1;text-align:center;padding:20px;font-size:.6em;color:rgba(0,255,255,.12);letter-spacing:3px;font-weight:bold}
 </style>
 </head>
 <body>
-<div class="particles" id="particles-cat"></div>
+<div class="particles" id="particles-bg"></div>
 <a href="index.html" class="back-btn">&#x2190; BACK TO GAME</a>
 <div id="header">
-    <h1>GHOST CUBES</h1>
-    <p>COMPLETE CATALOG &mdash; ALL 15 VARIANTS ACROSS 5 MAPS</p>
+    <h1>G H O S T &nbsp; C U B E S</h1>
+    <p>COMPLETE BESTIARY &mdash; ALL 15 VARIANTS &mdash; SPECTER FURY</p>
 </div>
-<div id="grid"></div>
+<div class="map-section" id="grid"></div>
+<div class="page-footer">Ghost Cubes · Complete Bestiary · www.fierroduque.com</div>
 
 <script type="module">
 import * as THREE from 'https://unpkg.com/three@0.132.2/build/three.module.js';
 
-const mapNames = ['CELESTIAL CRYPT','AMBER ABYSS','ALABASTER LABYRINTH','STEPPED BASTION','KALEIDOSCOPE PRISM'];
-const typeNames = { happy:'SCOUT', normal:'SOLDIER', angry:'TANK' };
-const typeDesc = { happy:'Elongated glitch cube · Slit eyes · Stitched mouth', normal:'Perfect cube + sub-cube · Hollow eyes · Pixel tears', angry:'Cube cluster · Static-grid eyes · Equalizer mouth' };
+// Particles
+(function(){var c=document.getElementById('particles-bg');for(var i=0;i<25;i++){var p=document.createElement('div');p.className='particle';var col=['#0ff','#f0f','rgba(0,255,255,.3)','rgba(255,0,255,.3)'][Math.floor(Math.random()*4)];var s=1+Math.random()*2;p.style.cssText='left:'+(Math.random()*100)+'%;width:'+s+'px;height:'+s+'px;background:'+col+';box-shadow:0 0 '+s*2+'px '+col+';animation-duration:'+(10+Math.random()*16)+'s;animation-delay:'+(Math.random()*14)+'s;opacity:'+(.1+Math.random()*.3);c.appendChild(p)}})();
 
-const ghostConfigs = [
-    [{ weight:0.2,sizeMin:0.8,sizeR:0.3,hp:1,spdMin:0.15,spdR:0.08,tex:'happy',col:0x00ff88},
-     { weight:0.3,sizeMin:1.8,sizeR:0.6,hp:3,spdMin:0.04,spdR:0.03,tex:'angry',col:0xff4400},
-     { weight:0.5,sizeMin:1.0,sizeR:0.4,hp:2,spdMin:0.06,spdR:0.06,tex:'normal',col:0x00ffff}],
-    [{ weight:0.25,sizeMin:0.6,sizeR:0.3,hp:1,spdMin:0.18,spdR:0.08,tex:'happy',col:0xffff00},
-     { weight:0.15,sizeMin:2.2,sizeR:0.8,hp:4,spdMin:0.03,spdR:0.03,tex:'angry',col:0xff0000},
-     { weight:0.6,sizeMin:1.0,sizeR:0.5,hp:2,spdMin:0.07,spdR:0.07,tex:'normal',col:0xff6600}],
-    [{ weight:0.3,sizeMin:0.5,sizeR:0.2,hp:1,spdMin:0.2,spdR:0.1,tex:'happy',col:0xff0044},
-     { weight:0.2,sizeMin:1.5,sizeR:0.5,hp:3,spdMin:0.02,spdR:0.02,tex:'angry',col:0x0044ff},
-     { weight:0.5,sizeMin:0.7,sizeR:0.3,hp:2,spdMin:0.1,spdR:0.05,tex:'normal',col:0xff00ff}],
-    [{ weight:0.15,sizeMin:1.0,sizeR:0.4,hp:2,spdMin:0.08,spdR:0.06,tex:'normal',col:0xffff00},
-     { weight:0.35,sizeMin:0.6,sizeR:0.3,hp:1,spdMin:0.15,spdR:0.08,tex:'happy',col:0x00ffcc},
-     { weight:0.5,sizeMin:1.2,sizeR:0.5,hp:3,spdMin:0.05,spdR:0.04,tex:'angry',col:0xff0044}],
-    [{ weight:0.25,sizeMin:0.5,sizeR:0.3,hp:1,spdMin:0.12,spdR:0.1,tex:'happy',col:0x00ffcc},
-     { weight:0.35,sizeMin:1.5,sizeR:0.8,hp:3,spdMin:0.04,spdR:0.05,tex:'angry',col:0xff8800},
-     { weight:0.4,sizeMin:0.8,sizeR:0.5,hp:2,spdMin:0.08,spdR:0.07,tex:'normal',col:0x44ff44}]
+var mapNames=['CELESTIAL CRYPT','AMBER ABYSS','ALABASTER LABYRINTH','STEPPED BASTION','KALEIDOSCOPE PRISM'];
+var typeLabels={happy:'SCOUT',normal:'SOLDIER',angry:'TANK'};
+
+var allConfigs=[
+    [{tex:'happy',col:0x00ff88,hp:1},{tex:'normal',col:0x00ffff,hp:2},{tex:'angry',col:0xff4400,hp:3}],
+    [{tex:'happy',col:0xffff00,hp:1},{tex:'normal',col:0xff6600,hp:2},{tex:'angry',col:0xff0000,hp:4}],
+    [{tex:'happy',col:0xff0044,hp:1},{tex:'normal',col:0xff00ff,hp:2},{tex:'angry',col:0x0044ff,hp:3}],
+    [{tex:'normal',col:0xffff00,hp:2},{tex:'happy',col:0x00ffcc,hp:1},{tex:'angry',col:0xff0044,hp:3}],
+    [{tex:'happy',col:0x00ffcc,hp:1},{tex:'normal',col:0x44ff44,hp:2},{tex:'angry',col:0xff8800,hp:3}]
 ];
 
-function hexToCSS(hex) { return '#' + hex.toString(16).padStart(6,'0') }
+function hex(c){return'#'+c.toString(16).padStart(6,'0')}
 
-function generateFace(baseColor, eyeColor, type) {
-    const c = document.createElement('canvas');
-    c.width = 64; c.height = 64;
-    const ctx = c.getContext('2d');
-    ctx.fillStyle = '#FFF';  // white base = gets tinted by ghost color
-    ctx.fillRect(0,0,64,64);
-    ctx.fillStyle = '#000';  // black features = always visible regardless of tint
+// Build HTML grid
+var grid=document.getElementById('grid');
+allConfigs.forEach(function(cfgs,mi){
+    var title=document.createElement('div');title.className='map-title';title.textContent='MAP '+(mi+1)+': '+mapNames[mi];grid.appendChild(title);
+    var row=document.createElement('div');row.className='row';grid.appendChild(row);
+    cfgs.forEach(function(cfg,ci){
+        var card=document.createElement('div');card.className='mini-card';
+        var c=document.createElement('canvas');c.width=200;c.height=210;c.id='c'+mi+'_'+ci;card.appendChild(c);
+        var label=document.createElement('div');label.className='label';
+        label.style.color=hex(cfg.col);label.style.textShadow='0 0 8px '+hex(cfg.col);
+        label.textContent=typeLabels[cfg.tex]+' · HP '+cfg.hp;
+        card.appendChild(label);row.appendChild(card);
 
-    if(type === 'happy') {
-        // SCOUT: two vertical slit eyes + stitched mouth
-        ctx.fillRect(16,18,6,14); ctx.fillRect(42,18,6,14);
-        ctx.fillRect(20,44,24,4);  // horizontal mouth line
-        for (let x = 22; x < 44; x += 6) { ctx.fillRect(x,40,3,12); }
-    } else if(type === 'angry') {
-        // TANK: square eyes with grid + equalizer mouth
-        ctx.fillRect(10,16,14,14); ctx.fillRect(40,16,14,14);
-        // Grid lines in eyes
-        ctx.fillStyle = '#FFF'; ctx.fillRect(12,18,10,1); ctx.fillRect(42,18,10,1);
-        ctx.fillRect(12,24,10,1); ctx.fillRect(42,24,10,1);
-        ctx.fillRect(12,20,10,1); ctx.fillRect(42,20,10,1);
-        ctx.fillRect(12,22,10,1); ctx.fillRect(42,22,10,1);
-        ctx.fillStyle = '#000';
-        // Equalizer bar mouth
-        const bars = [6,10,4,14,8,12,5,7];
-        for (let i = 0; i < bars.length; i++) {
-            ctx.fillRect(14 + i*5, 50 - bars[i]/2, 3, bars[i]);
-        }
-    } else {
-        // SOLDIER: hollow square eyes + pixel tears + open square mouth
-        ctx.strokeStyle = '#000'; ctx.lineWidth = 3;
-        ctx.strokeRect(13,17,12,12); ctx.strokeRect(39,17,12,12);
-        // Pixel tears cascading
-        for (let y = 32; y < 48; y += 2) {
-            ctx.fillRect(18,y,2,2); ctx.fillRect(44,y,2,2);
-        }
-        ctx.fillRect(17,30,1,1); ctx.fillRect(20,31,2,1);
-        ctx.fillRect(43,30,1,1); ctx.fillRect(46,31,2,1);
-        // Open square mouth
-        ctx.strokeRect(24,46,16,10);
-    }
-    const tex = new THREE.CanvasTexture(c);
-    tex.magFilter = THREE.NearestFilter;
-    return tex;
-}
-
-const texCache = {};
-function getTex(tex, col) {
-    const key = tex;
-    if (!texCache[key]) {
-        texCache[key] = generateFace('#FFF', '#000', tex);
-    }
-    return texCache[key];
-}
-
-const grid = document.getElementById('grid');
-
-// Spawn particles
-(function(){
-    var c = document.getElementById('particles-cat');
-    for (var i = 0; i < 30; i++) {
-        var p = document.createElement('div');
-        p.className = 'particle';
-        var col = ['#0ff','#f0f','rgba(0,255,255,.5)','rgba(255,0,255,.5)'][Math.floor(Math.random()*4)];
-        var s = 1 + Math.random() * 3;
-        p.style.cssText = 'left:'+(Math.random()*100)+'%;width:'+s+'px;height:'+s+'px;background:'+col+';box-shadow:0 0 '+s*2+'px '+col+';animation-duration:'+(10+Math.random()*16)+'s;animation-delay:'+(Math.random()*14)+'s;opacity:'+(.15+Math.random()*.35);
-        c.appendChild(p);
-    }
-})();
-
-// Build cards
-ghostConfigs.forEach((configs, mapIdx) => {
-    const label = document.createElement('div');
-    label.className = 'map-label';
-    label.textContent = '\u25B8 MAP ' + (mapIdx+1) + ': ' + mapNames[mapIdx];
-    grid.appendChild(label);
-
-    configs.forEach((cfg, i) => {
-        const card = document.createElement('div');
-        card.className = 'card';
-
-        const h3 = document.createElement('h3');
-        h3.textContent = 'MAP ' + (mapIdx+1) + ' \u2022 VARIANT ' + (i+1);
-        card.appendChild(h3);
-
-        const canvas = document.createElement('canvas');
-        canvas.width = 180; canvas.height = 180;
-        card.appendChild(canvas);
-
-        const nameDiv = document.createElement('div');
-        nameDiv.className = 'name';
-        nameDiv.style.color = hexToCSS(cfg.col);
-        nameDiv.style.textShadow = '0 0 12px ' + hexToCSS(cfg.col);
-        nameDiv.textContent = typeNames[cfg.tex];
-        card.appendChild(nameDiv);
-
-        const typeDiv = document.createElement('div');
-        typeDiv.className = 'type';
-        typeDiv.style.color = hexToCSS(cfg.col);
-        typeDiv.textContent = typeDesc[cfg.tex];
-        card.appendChild(typeDiv);
-
-        const stats = document.createElement('div');
-        stats.className = 'stats';
-        stats.innerHTML =
-            '<span>HP:</span> ' + cfg.hp + '<br>' +
-            '<span>Speed:</span> ' + (cfg.spdMin).toFixed(2) + '-' + (cfg.spdMin+cfg.spdR).toFixed(2) + ' u/f<br>' +
-            '<span>Size:</span> ' + (cfg.sizeMin).toFixed(1) + '-' + (cfg.sizeMin+cfg.sizeR).toFixed(1) + ' u<br>' +
-            '<span>Spawn:</span> ' + Math.round(cfg.weight*100) + '% chance<br>' +
-            '<span>Face:</span> ' + cfg.tex;
-        card.appendChild(stats);
-
-        grid.appendChild(card);
-
-        // Three.js mini renderer
-        setTimeout(() => {
-            const renderer = new THREE.WebGLRenderer({ canvas, antialias: true, alpha: true });
-            renderer.setSize(180, 180);
-            renderer.setClearColor(0x000000, 0);
-            const scene = new THREE.Scene();
-            const cam = new THREE.PerspectiveCamera(40, 1, 0.1, 20);
-            cam.position.set(0, 2.2, 4.5);
-            cam.lookAt(0, 0, 0);
-
-            const light = new THREE.AmbientLight(0xffffff, 0.7);
-            scene.add(light);
-
-            const size = cfg.sizeMin + cfg.sizeR * 0.5;
-            const tex = getTex(cfg.tex, cfg.col);
-            const mat = new THREE.MeshBasicMaterial({ map: tex, color: cfg.col });
-
-            // 3D model per type
-            const ghostGroup = new THREE.Group();
-            if (cfg.tex === 'happy') {
-                // SCOUT: elongated cube (taller than wide)
-                const geo = new THREE.BoxGeometry(size*0.7, size*1.4, size*0.7);
-                const ghost = new THREE.Mesh(geo, mat);
-                ghostGroup.add(ghost);
-            } else if (cfg.tex === 'angry') {
-                // TANK: cluster of cubes
-                const core = new THREE.Mesh(new THREE.BoxGeometry(size, size, size), mat);
-                ghostGroup.add(core);
-                const corners = [[size*0.45,size*0.4,size*0.4],[-size*0.4,size*0.5,-size*0.35],[size*0.4,-size*0.45,size*0.35],[-size*0.5,-size*0.4,-size*0.45],[size*0.5,size*0.35,-size*0.5]];
-                corners.forEach(([dx,dy,dz]) => {
-                    const sub = new THREE.Mesh(new THREE.BoxGeometry(size*0.35, size*0.35, size*0.35), mat.clone());
-                    sub.position.set(dx, dy, dz);
-                    ghostGroup.add(sub);
-                });
-            } else {
-                // SOLDIER: perfect cube + sub-cube on bottom-left
-                const mainGeo = new THREE.BoxGeometry(size, size, size);
-                const ghost = new THREE.Mesh(mainGeo, mat);
-                ghostGroup.add(ghost);
-                const subGeo = new THREE.BoxGeometry(size*0.35, size*0.35, size*0.35);
-                const sub = new THREE.Mesh(subGeo, mat.clone());
-                sub.position.set(-size*0.45, -size*0.5, 0);
-                ghostGroup.add(sub);
-            }
-            scene.add(ghostGroup);
-
-            // Ring indicator for scale
-            const ring = new THREE.Mesh(
-                new THREE.TorusGeometry(size*0.8, 0.03, 8, 16),
-                new THREE.MeshBasicMaterial({ color: cfg.col, transparent: true, opacity: 0.4 })
-            );
-            ring.rotation.x = Math.PI/2;
-            scene.add(ring);
-
-            function render() {
-                requestAnimationFrame(render);
-                ghostGroup.rotation.y += 0.008;
-                ring.rotation.z += 0.01;
-                ghostGroup.position.y = Math.sin(Date.now()*0.003) * 0.15;
-                renderer.render(scene, cam);
-            }
-            render();
-        }, 50);
+        setTimeout(function(){renderMini('c'+mi+'_'+ci,cfg.tex,cfg.col);},30);
     });
 });
 
-// Attack info
-const atkDiv = document.createElement('div');
-atkDiv.id = 'attack-info';
-atkDiv.innerHTML = '<h2>ATTACK BEHAVIOR (ALL VARIANTS)</h2>' +
-    '<p>All ghosts share the same attack mechanics. Differences are in <span>HP</span>, <span>speed</span>, and <span>size</span> only.</p><br>' +
-    '<p><span>Chase range:</span> <code>25 units</code> from player</p>' +
-    '<p><span>Attack range:</span> <code>&lt; 1.5 units</code> (contact)</p>' +
-    '<p><span>Damage per hit:</span> <code>15 HP</code></p>' +
-    '<p><span>Invulnerability window:</span> <code>300 ms</code> after each hit</p>' +
-    '<p><span>Kill reward:</span> +1 kill (spawns replacement ghost)</p>' +
-    '<p><span>Ghost limit:</span> <code>50</code> total active per map</p>' +
-    '<br><p><span>Scout (Happy face):</span> Smallest, fastest \u2014 swarm attackers</p>' +
-    '<p><span>Soldier (Normal face):</span> Medium stats \u2014 balanced threat</p>' +
-    '<p><span>Tank (Angry face):</span> Largest, slowest \u2014 high HP bullet sponges</p>';
-grid.parentNode.insertBefore(atkDiv, grid.nextSibling);
+// Shared face builder
+function buildAngryFace(scale){
+    var fg=new THREE.Group();
+    var bk=new THREE.MeshBasicMaterial({color:0x111111});
+    var rd=new THREE.MeshBasicMaterial({color:0xff2222});
+    var bGeo=new THREE.BoxGeometry(.12*scale,.02*scale,.04*scale);
+    var lb=new THREE.Mesh(bGeo,bk);lb.position.set(-.1*scale,.26*scale,.35*scale);lb.rotation.z=-.18;fg.add(lb);
+    var rb=new THREE.Mesh(bGeo,bk);rb.position.set(.1*scale,.26*scale,.35*scale);rb.rotation.z=.18;fg.add(rb);
+    var eGeo=new THREE.BoxGeometry(.09*scale,.018*scale,.04*scale);
+    var le=new THREE.Mesh(eGeo,bk);le.position.set(-.1*scale,.22*scale,.37*scale);le.rotation.z=-.18;fg.add(le);
+    var re=new THREE.Mesh(eGeo,bk);re.position.set(.1*scale,.22*scale,.37*scale);re.rotation.z=.18;fg.add(re);
+    var pGeo=new THREE.BoxGeometry(.028*scale,.01*scale,.045*scale);
+    var lp=new THREE.Mesh(pGeo,rd);lp.position.set(-.1*scale,.22*scale,.4*scale);lp.rotation.z=-.18;fg.add(lp);
+    var rp=new THREE.Mesh(pGeo,rd);rp.position.set(.1*scale,.22*scale,.4*scale);rp.rotation.z=.18;fg.add(rp);
+    var ml=new THREE.Mesh(new THREE.BoxGeometry(.24*scale,.018*scale,.03*scale),bk);ml.position.set(0,.14*scale,.38*scale);fg.add(ml);
+    var fl=[.04,.055,.06,.055,.04];
+    for(var i=0;i<5;i++){var f=new THREE.Mesh(new THREE.ConeGeometry(.02*scale,fl[i]*scale,4),bk);f.position.set((i-2)*.05*scale,.14*scale-fl[i]*scale*.4,.38*scale);f.rotation.z=Math.PI;fg.add(f);}
+    return fg;
+}
 
-// Footer
-const footer = document.createElement('div');
-footer.className = 'page-footer';
-footer.textContent = 'Ghost Cubes \u2022 Enemy Catalog \u2022 www.fierroduque.com';
-atkDiv.parentNode.insertBefore(footer, atkDiv.nextSibling);
+// Horns with body color
+function buildHorns(scale,size,color){
+    var hg=new THREE.Group();
+    var mat=new THREE.MeshStandardMaterial({color:color,roughness:.35,metalness:0});
+    for(var s=-1;s<=1;s+=2){
+        var h=new THREE.Mesh(new THREE.ConeGeometry(.04*scale,size*scale,6),mat);
+        h.position.set(s*.12*scale,.35*scale+size*scale*.3,.1*scale);h.rotation.z=s*.45;h.rotation.x=-.2;hg.add(h);
+    }
+    return hg;
+}
+
+function renderMini(id,type,color){
+    var canvas=document.getElementById(id);if(!canvas)return;
+    var scale=type==='angry'?1.15:type==='happy'?.85:1.0;
+    var w=type==='angry'?6:type==='happy'?7:5;
+    var hornSize=type==='angry'?.28:type==='happy'?.16:.2;
+
+    var renderer=new THREE.WebGLRenderer({canvas,antialias:true,alpha:true});
+    renderer.setSize(200,210);renderer.setClearColor(0x000000,0);
+    var scene=new THREE.Scene();
+    var cam=new THREE.PerspectiveCamera(32,200/210,.1,15);
+    cam.position.set(0,1.2,4.6);cam.lookAt(0,.05,0);
+    scene.add(new THREE.AmbientLight(0xffffff,.5));
+    var key=new THREE.DirectionalLight(0xffffff,.6);key.position.set(3,4,2);scene.add(key);
+
+    var bodyMat=new THREE.MeshStandardMaterial({color:color,roughness:.35,metalness:0});
+    var group=new THREE.Group();
+
+    // Body
+    var headGeo=new THREE.SphereGeometry(.43*scale,16,12);
+    var head=new THREE.Mesh(headGeo,bodyMat);head.scale.set(1,.82,1);head.position.y=.08*scale;group.add(head);
+    var skirtGeo=new THREE.CylinderGeometry(.3*scale,.44*scale,.42*scale,16,1,true);skirtGeo.translate(0,-.48*scale,0);
+    var skirt=new THREE.Mesh(skirtGeo,bodyMat);if(type==='angry')skirt.scale.set(1.1,1,1.1);group.add(skirt);
+    for(var i=0;i<w;i++){var a=(i/w)*Math.PI*2;var h=.05*scale+.04*scale*Math.sin(i*1.8+1.2);var pt=new THREE.Mesh(new THREE.SphereGeometry(.055*scale,5,5),bodyMat);pt.position.set(Math.cos(a)*.35*scale,-.68*scale+h,Math.sin(a)*.35*scale*.5);group.add(pt);}
+    var ring=new THREE.Mesh(new THREE.TorusGeometry(.33*scale,.035*scale,6,12),bodyMat);ring.rotation.x=Math.PI/2;ring.position.y=-.26*scale;group.add(ring);
+
+    // Soldier sub-cube
+    if(type==='normal'){var sub=new THREE.Mesh(new THREE.BoxGeometry(scale*.35,scale*.35,scale*.35),bodyMat);sub.position.set(-scale*.45,-scale*.5,0);group.add(sub);}
+    // Tank cluster
+    if(type==='angry'){[[scale*.45,scale*.4,scale*.4],[-scale*.4,scale*.5,-scale*.35],[scale*.4,-scale*.45,scale*.35],[-scale*.5,-scale*.4,-scale*.45],[scale*.5,scale*.35,-scale*.5]].forEach(function(d){var s=new THREE.Mesh(new THREE.BoxGeometry(scale*.35,scale*.35,scale*.35),bodyMat);s.position.set(d[0],d[1],d[2]);group.add(s);});}
+
+    var face=buildAngryFace(scale);group.add(face);
+    var horns=buildHorns(scale,hornSize,color);group.add(horns);
+    scene.add(group);
+
+    var auraGeo=new THREE.SphereGeometry(scale*.3,12,12);
+    var aura=new THREE.Mesh(auraGeo,new THREE.MeshBasicMaterial({color:color,transparent:true,opacity:.05,side:THREE.DoubleSide}));
+    aura.position.y=-.08;scene.add(aura);
+
+    var speed=.002+.0003*Math.random();
+    function animate(){requestAnimationFrame(animate);var t=Date.now()*speed;group.position.y=Math.sin(t*1.5)*.08;group.rotation.y=Math.sin(t*.4)*.04;group.rotation.z=Math.sin(t*.6)*.025;group.scale.setScalar(1+.012*Math.sin(t*2));aura.scale.setScalar(1+.04*Math.sin(t*1.2));renderer.render(scene,cam);}
+    animate();
+}
 </script>
 </body>
 </html>

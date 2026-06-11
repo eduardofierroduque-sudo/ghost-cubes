@@ -1656,13 +1656,13 @@
         const gh = getHeightAt(cellX, cellZ);
         const mat = new THREE.MeshBasicMaterial({ map: texMap, color: col });
 
-        let g;
+        let g, hornGroup;
         if (gc.tex === 'happy') {
-            // SCOUT: elongated cube
+            g = new THREE.Group();
             const geo = new THREE.BoxGeometry(size*0.7, size*1.4, size*0.7);
-            g = new THREE.Mesh(geo, mat);
+            g.add(new THREE.Mesh(geo, mat));
+            hornGroup = g;
         } else if (gc.tex === 'angry') {
-            // TANK: cube cluster
             g = new THREE.Group();
             const core = new THREE.Mesh(new THREE.BoxGeometry(size, size, size), mat);
             g.add(core);
@@ -1671,13 +1671,25 @@
                 const sub = new THREE.Mesh(new THREE.BoxGeometry(size*0.35, size*0.35, size*0.35), mat.clone());
                 sub.position.set(dx, dy, dz); g.add(sub);
             });
+            hornGroup = g;
         } else {
-            // SOLDIER: perfect cube + sub-cube
             g = new THREE.Group();
             const main = new THREE.Mesh(new THREE.BoxGeometry(size, size, size), mat);
             g.add(main);
             const sub = new THREE.Mesh(new THREE.BoxGeometry(size*0.35, size*0.35, size*0.35), mat.clone());
             sub.position.set(-size*0.45, -size*0.5, 0); g.add(sub);
+            hornGroup = g;
+        }
+
+        // Devil horns (color matches body)
+        const hornSize = gc.tex === 'angry' ? size*0.25 : gc.tex === 'happy' ? size*0.14 : size*0.18;
+        const hornMat = new THREE.MeshStandardMaterial({ color: col, roughness: 0.35, metalness: 0 });
+        for (let s = -1; s <= 1; s += 2) {
+            const horn = new THREE.Mesh(new THREE.ConeGeometry(size*0.04, hornSize, 6), hornMat);
+            horn.position.set(s * size*0.12, size*0.35 + hornSize*0.3, size*0.2);
+            horn.rotation.z = s * 0.45;
+            horn.rotation.x = -0.2;
+            hornGroup.add(horn);
         }
 
         g.position.set(pos.x, gh + size/2 + 0.5, pos.z);
