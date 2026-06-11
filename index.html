@@ -1641,23 +1641,24 @@
         const fg = new THREE.Group();
         const bk = new THREE.MeshBasicMaterial({ color: 0x111111 });
         const rd = new THREE.MeshBasicMaterial({ color: 0xff2222 });
+        const z = scale * 0.51; // front surface of cube body
         // Eyebrows
         const bGeo = new THREE.BoxGeometry(.12*scale, .02*scale, .04*scale);
-        const lb = new THREE.Mesh(bGeo,bk); lb.position.set(-.1*scale,.26*scale,.35*scale); lb.rotation.z=-.18; fg.add(lb);
-        const rb = new THREE.Mesh(bGeo,bk); rb.position.set(.1*scale,.26*scale,.35*scale); rb.rotation.z=.18; fg.add(rb);
+        const lb = new THREE.Mesh(bGeo,bk); lb.position.set(-.1*scale,.26*scale,z-.02); lb.rotation.z=-.18; fg.add(lb);
+        const rb = new THREE.Mesh(bGeo,bk); rb.position.set(.1*scale,.26*scale,z-.02); rb.rotation.z=.18; fg.add(rb);
         // Eyes
         const eGeo = new THREE.BoxGeometry(.09*scale, .018*scale, .04*scale);
-        const le = new THREE.Mesh(eGeo,bk); le.position.set(-.1*scale,.22*scale,.37*scale); le.rotation.z=-.18; fg.add(le);
-        const re = new THREE.Mesh(eGeo,bk); re.position.set(.1*scale,.22*scale,.37*scale); re.rotation.z=.18; fg.add(re);
+        const le = new THREE.Mesh(eGeo,bk); le.position.set(-.1*scale,.22*scale,z); le.rotation.z=-.18; fg.add(le);
+        const re = new THREE.Mesh(eGeo,bk); re.position.set(.1*scale,.22*scale,z); re.rotation.z=.18; fg.add(re);
         // Red pupils
         const pGeo = new THREE.BoxGeometry(.028*scale, .01*scale, .045*scale);
-        const lp = new THREE.Mesh(pGeo,rd); lp.position.set(-.1*scale,.22*scale,.4*scale); lp.rotation.z=-.18; fg.add(lp);
-        const rp = new THREE.Mesh(pGeo,rd); rp.position.set(.1*scale,.22*scale,.4*scale); rp.rotation.z=.18; fg.add(rp);
+        const lp = new THREE.Mesh(pGeo,rd); lp.position.set(-.1*scale,.22*scale,z+.03); lp.rotation.z=-.18; fg.add(lp);
+        const rp = new THREE.Mesh(pGeo,rd); rp.position.set(.1*scale,.22*scale,z+.03); rp.rotation.z=.18; fg.add(rp);
         // Frown
-        const ml = new THREE.Mesh(new THREE.BoxGeometry(.24*scale,.018*scale,.03*scale),bk); ml.position.set(0,.14*scale,.38*scale); fg.add(ml);
+        const ml = new THREE.Mesh(new THREE.BoxGeometry(.24*scale,.018*scale,.03*scale),bk); ml.position.set(0,.14*scale,z); fg.add(ml);
         // Fangs
         const fl=[.04,.055,.06,.055,.04];
-        for(let i=0;i<5;i++){const f=new THREE.Mesh(new THREE.ConeGeometry(.02*scale,fl[i]*scale,4),bk);f.position.set((i-2)*.05*scale,.14*scale-fl[i]*scale*.4,.38*scale);f.rotation.z=Math.PI;fg.add(f);}
+        for(let i=0;i<5;i++){const f=new THREE.Mesh(new THREE.ConeGeometry(.02*scale,fl[i]*scale,4),bk);f.position.set((i-2)*.05*scale,.14*scale-fl[i]*scale*.4,z+.01);f.rotation.z=Math.PI;fg.add(f);}
         return fg;
     }
 
