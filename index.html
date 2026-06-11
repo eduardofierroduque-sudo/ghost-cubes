@@ -810,10 +810,6 @@
         camera.add(flashLight);
         scene.add(camera);
 
-        texNormal = generateFace("#FFF", "#000", 'normal');
-        texAngry = texNormal;
-        texHappy = texNormal;
-
         initGame();
         setupControls();
         animate();
@@ -1641,13 +1637,36 @@
         return (hd[cx] && hd[cx][cz] !== undefined) ? hd[cx][cz] : 0;
     }
 
+    function buildSpecterFace(scale) {
+        const fg = new THREE.Group();
+        const bk = new THREE.MeshBasicMaterial({ color: 0x111111 });
+        const rd = new THREE.MeshBasicMaterial({ color: 0xff2222 });
+        // Eyebrows
+        const bGeo = new THREE.BoxGeometry(.12*scale, .02*scale, .04*scale);
+        const lb = new THREE.Mesh(bGeo,bk); lb.position.set(-.1*scale,.26*scale,.35*scale); lb.rotation.z=-.18; fg.add(lb);
+        const rb = new THREE.Mesh(bGeo,bk); rb.position.set(.1*scale,.26*scale,.35*scale); rb.rotation.z=.18; fg.add(rb);
+        // Eyes
+        const eGeo = new THREE.BoxGeometry(.09*scale, .018*scale, .04*scale);
+        const le = new THREE.Mesh(eGeo,bk); le.position.set(-.1*scale,.22*scale,.37*scale); le.rotation.z=-.18; fg.add(le);
+        const re = new THREE.Mesh(eGeo,bk); re.position.set(.1*scale,.22*scale,.37*scale); re.rotation.z=.18; fg.add(re);
+        // Red pupils
+        const pGeo = new THREE.BoxGeometry(.028*scale, .01*scale, .045*scale);
+        const lp = new THREE.Mesh(pGeo,rd); lp.position.set(-.1*scale,.22*scale,.4*scale); lp.rotation.z=-.18; fg.add(lp);
+        const rp = new THREE.Mesh(pGeo,rd); rp.position.set(.1*scale,.22*scale,.4*scale); rp.rotation.z=.18; fg.add(rp);
+        // Frown
+        const ml = new THREE.Mesh(new THREE.BoxGeometry(.24*scale,.018*scale,.03*scale),bk); ml.position.set(0,.14*scale,.38*scale); fg.add(ml);
+        // Fangs
+        const fl=[.04,.055,.06,.055,.04];
+        for(let i=0;i<5;i++){const f=new THREE.Mesh(new THREE.ConeGeometry(.02*scale,fl[i]*scale,4),bk);f.position.set((i-2)*.05*scale,.14*scale-fl[i]*scale*.4,.38*scale);f.rotation.z=Math.PI;fg.add(f);}
+        return fg;
+    }
+
     function spawnGhost() {
         const map = getMap();
         const gc = pickGhostConfig();
         const size = gc.sizeMin + Math.random() * gc.sizeR;
         const hp = gc.hp;
         const spd = gc.spdMin + Math.random() * gc.spdR;
-        const texMap = gc.tex === 'happy' ? texHappy : gc.tex === 'angry' ? texAngry : texNormal;
         const col = gc.col;
 
         const pos = randomGhostPos(map);
@@ -1655,42 +1674,35 @@
         const cellX = Math.floor(pos.x / UNIT_SIZE);
         const cellZ = Math.floor(pos.z / UNIT_SIZE);
         const gh = getHeightAt(cellX, cellZ);
-        const mat = new THREE.MeshBasicMaterial({ map: texMap, color: col });
+        const bodyMat = new THREE.MeshStandardMaterial({ color: col, roughness: 0.35, metalness: 0 });
 
-        let g, hornGroup;
+        const g = new THREE.Group();
         if (gc.tex === 'happy') {
-            g = new THREE.Group();
             const geo = new THREE.BoxGeometry(size*0.7, size*1.4, size*0.7);
-            g.add(new THREE.Mesh(geo, mat));
-            hornGroup = g;
+            g.add(new THREE.Mesh(geo, bodyMat));
         } else if (gc.tex === 'angry') {
-            g = new THREE.Group();
-            const core = new THREE.Mesh(new THREE.BoxGeometry(size, size, size), mat);
-            g.add(core);
-            const corners = [[size*0.45,size*0.4,size*0.4],[-size*0.4,size*0.5,-size*0.35],[size*0.4,-size*0.45,size*0.35],[-size*0.5,-size*0.4,-size*0.45],[size*0.5,size*0.35,-size*0.5]];
-            corners.forEach(([dx,dy,dz]) => {
-                const sub = new THREE.Mesh(new THREE.BoxGeometry(size*0.35, size*0.35, size*0.35), mat.clone());
+            g.add(new THREE.Mesh(new THREE.BoxGeometry(size, size, size), bodyMat));
+            [[size*0.45,size*0.4,size*0.4],[-size*0.4,size*0.5,-size*0.35],[size*0.4,-size*0.45,size*0.35],[-size*0.5,-size*0.4,-size*0.45],[size*0.5,size*0.35,-size*0.5]].forEach(([dx,dy,dz]) => {
+                const sub = new THREE.Mesh(new THREE.BoxGeometry(size*0.35, size*0.35, size*0.35), bodyMat);
                 sub.position.set(dx, dy, dz); g.add(sub);
             });
-            hornGroup = g;
         } else {
-            g = new THREE.Group();
-            const main = new THREE.Mesh(new THREE.BoxGeometry(size, size, size), mat);
-            g.add(main);
-            const sub = new THREE.Mesh(new THREE.BoxGeometry(size*0.35, size*0.35, size*0.35), mat.clone());
+            g.add(new THREE.Mesh(new THREE.BoxGeometry(size, size, size), bodyMat));
+            const sub = new THREE.Mesh(new THREE.BoxGeometry(size*0.35, size*0.35, size*0.35), bodyMat);
             sub.position.set(-size*0.45, -size*0.5, 0); g.add(sub);
-            hornGroup = g;
         }
 
-        // Devil horns (color matches body)
+        // Specter Fury 3D face
+        g.add(buildSpecterFace(size));
+
+        // Devil horns
         const hornSize = gc.tex === 'angry' ? size*0.25 : gc.tex === 'happy' ? size*0.14 : size*0.18;
-        const hornMat = new THREE.MeshStandardMaterial({ color: col, roughness: 0.35, metalness: 0 });
         for (let s = -1; s <= 1; s += 2) {
-            const horn = new THREE.Mesh(new THREE.ConeGeometry(size*0.04, hornSize, 6), hornMat);
+            const horn = new THREE.Mesh(new THREE.ConeGeometry(size*0.04, hornSize, 6), bodyMat);
             horn.position.set(s * size*0.12, size*0.35 + hornSize*0.3, size*0.2);
             horn.rotation.z = s * 0.45;
             horn.rotation.x = -0.2;
-            hornGroup.add(horn);
+            g.add(horn);
         }
 
         g.position.set(pos.x, gh + size/2 + 0.5, pos.z);
